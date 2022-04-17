@@ -118,6 +118,13 @@ prediction = DT.predict(X_test)
 # For classification, using accuracy and F1 score
 print(accuracy_score(y_test,prediction))
 print(f1_score(y_test,prediction))
+
+# TODO Save the output model to a file...
+# ... This is required for the model to get automatically uploaded by the Notebook using this script
+# with open(model_file_name, "wb") as file:
+#     joblib.dump(value=reg, filename=os.path.join('./outputs/',
+#                                                     model_file_name))
+
  
 # for regression...
 #
