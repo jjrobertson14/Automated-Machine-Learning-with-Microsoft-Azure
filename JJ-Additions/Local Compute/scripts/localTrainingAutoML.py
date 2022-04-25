@@ -88,11 +88,10 @@ df = dataset.to_pandas_dataframe()
 
 # Prepare pandas dataframes of train/test data to pass to train_test_split
 df_column_names = ['Survived', 'Pclass', 'Sex', 'Age', 'SibSp', 'Parch', 'Fare', 'Cabin', 'Embarked']
-target_column_name = 'Survived'
-feature_column_names = df_column_names[1:]
+df_numeric_column_names = ['Age', 'Fare']
 
-# BEGIN Reform df dataframe so that it contains all numbers...
-# For int column Age, Impute NaN numeric values and Remove outliers
+# BEGIN Reform df dataframe so that it contains all numbers that are preprocessed...
+# For int column Age, Impute NaN numeric values, and Remove outliers
 print('Before Removing outliers or Imputing null values, df[Age]: ', df['Age'])
 ageMedian = np.nanmedian(df['Age'])
 print('ageMedian: ', ageMedian)
@@ -110,40 +109,57 @@ df['Age'] = df['Age'].mask(df['Age'] > ageOutlierThreshold, ageOutlierThreshold)
 print('After Removing outliers and Imputing null values, df[Age]: ', df['Age'])
 
 # Copy df, keeping only Age column, set type of this df copy to float
-df_age_column = pd.DataFrame(data=df['Age'], columns=['Age'])
+df_age_column = pd.DataFrame(df['Age'], columns=['Age'])
 
 # Copy df, keeping only float numeric columns, set type of this df copy to float
 df_float_column_names = ['Fare']
 print('df_float_column_names: ', df_float_column_names)
-df_float_columns = pd.DataFrame(data=df[df_float_column_names], dtype=np.float, columns=df_float_column_names)
+df_float_columns = pd.DataFrame(df[df_float_column_names], dtype=np.float, columns=df_float_column_names)
+
+# Concatenate the numeric Data Frames to scale them
+print('Before concatenation to df_numeric_columns, df[Age]: ', df['Age'])
+print('Before concatenation to df_numeric_columns, df_age_column: ', df_age_column)
+df_numeric_columns = pd.concat([df_age_column, df_float_columns], keys=df_numeric_column_names, axis=1)
+print('concatenated df_numeric_columns: ', df_numeric_columns)
+
+# Use StandardScaler or MinMaxScaler on Numeric/Non-Categorical columns split
+scaler = StandardScaler().fit(df_numeric_columns)
+print('scaler.mean_: ', scaler.mean_)
+print('scaler.scale: ', scaler.scale_)
+
+df_scaled_numeric_columns =  pd.DataFrame(scaler.transform(df_numeric_columns), columns=df_numeric_column_names)
+print('df_scaled_numeric_columns: ', df_scaled_numeric_columns)
+# Scaled data should have zero mean and unit variance, check with these prints:
+print('df_scaled_numeric_columns.mean(axis=0): ', df_scaled_numeric_columns.mean(axis=0))
+print('df_scaled_numeric_columns.std(axis=0)', df_scaled_numeric_columns.std(axis=0))
 
 # Copy df, keeping only categorical columns, and one-hot encode them
-df_categorical_column_names_tmp = ['Survived', 'Pclass', 'Sex', 'SibSp', 'Parch', 'Cabin', 'Embarked']
+df_categorical_column_names_tmp = ['Pclass', 'Sex', 'SibSp', 'Parch', 'Cabin', 'Embarked']
 df_categorical_column_names = df_categorical_column_names_tmp
 print('df_categorical_column_names: ', df_categorical_column_names)
-df_categorical_columns = pd.DataFrame(data=df[df_categorical_column_names], dtype=np.str, columns=df_categorical_column_names)
-encoder = OneHotEncoder(drop='first', handle_unknown='error', sparse=False).fit(df_categorical_columns)
-# TODO resolve NaN in Age column...
+df_categorical_columns = pd.DataFrame(df[df_categorical_column_names], dtype=np.str, columns=df_categorical_column_names)
+print('df_categorical_columns: ', df_categorical_columns)
+encoder = OneHotEncoder(drop='first', handle_unknown='error', sparse=False, ).fit(df_categorical_columns)
 print('encoder.categories: ', encoder.categories)
 # Should get something similiar in form to this printed...
 #   [array(['female', 'male'], dtype=object), array(['from Europe', 'from US'], dtype=object), array(['uses Firefox', 'uses Safari'], dtype=object)]
 df_encoded_categorical_columns = pd.DataFrame(encoder.transform(df_categorical_columns))
+df_encoded_categorical_columns.columns = encoder.get_feature_names(df_categorical_column_names)
+print('df_encoded_categorical_columns: ', df_encoded_categorical_columns)
 # Should get something like this returned...
 #   array([[1., 0., 0., 1., 0., 1.],
 #     [0., 1., 1., 0., 0., 1.]])
 #   By default, the values each feature can take is inferred automatically from the dataset and can be found in the categories_ attribute:
 # Combine the numeric DF with the categorical DF
 
-# dfTyped = df_numeric_columns.combine(df_encoded_categorical_columns)
-# dfTyped = df_age_column.combine(df_float_columns, df_encoded_categorical_columns)
-dfs = [df_age_column, df_float_columns, df_encoded_categorical_columns]
-# TODO resolve NaN in Age column...
-print('Before concatenation, df[Age]: ', df['Age'])
-print('Before concatenation, df_age_column: ', df_age_column)
-dfTyped = pd.concat(dfs)
+dfs = [df['Survived'], df_scaled_numeric_columns, df_encoded_categorical_columns]
+print('Before concatenation to dfTyped, df[\'Survived\']: ', df['Survived'])
+print('Before concatenation to dfTyped, df[Age]: ', df['Age'])
+print('Before concatenation to dfTyped, df_numeric_columns: ', df_numeric_columns)
+print('Before concatenation to dfTyped, df_scaled_numeric_columns: ', df_scaled_numeric_columns)
+dfTyped = pd.concat(dfs, axis=1)
 print('dfTyped: ', dfTyped)
-
-# TODO Potentially resolve weird columns?...
+print('dfTyped[Age]: ', dfTyped['Age'])
 
         # - ! With sklearn.preprocessing, preprocess your Dataframes before training model in the Python Script
         #     - [Guide at SciKit Learn site](https://scikit-learn.org/stable/modules/preprocessing.html)
@@ -155,29 +171,15 @@ print('dfTyped: ', dfTyped)
         #             - ! Use StandardScaler or MinMaxScaler on Numeric/Non-Categorical columns split
         #             - d Use OneHotEncoder on Non-Numeric/Categorical columns split
 
-
-# TODO: ! Use StandardScaler or MinMaxScaler on Numeric/Non-Categorical columns split
-scaler = StandardScaler().fit(dfTyped)
-print('scaler.mean_: ', scaler.mean_)
-print('scaler.scale: ', scaler.scale_)
-
-dfScaled = scaler.transform(dfTyped)
-print('dfScaled: ', dfScaled)
-# Scaled data should have zero mean and unit variance, check with these prints:
-print('dfScaled.mean(axis=0): ', dfScaled.mean(axis=0))
-print('dfScaled.std(axis=0)', dfScaled.std(axis=0))
-
-# TODO Initial Data Frame is now preprocessed in dfPreprocessed
-dfPreprocessed = dfScaled
+# Initial Data Frame is now preprocessed in dfPreprocessed
+dfPreprocessed = dfTyped
 print('dfPreprocessed: ', dfPreprocessed)
-
 # END Reform df dataframe so that it contains all numbers...
 
-
-
-df_x = dfPreprocessed.drop_columns([target_column_name]).to_pandas_dataframe()
-print("here are feature_columns: ", feature_column_names)
-df_y = dfPreprocessed.drop_columns(feature_column_names).to_pandas_dataframe()
+# Split DataFrame for training now that it is pre-processed
+target_column_name = 'Survived'
+df_x = dfPreprocessed.drop([target_column_name], axis=1)
+df_y = dfPreprocessed.filter([target_column_name], axis=1)
 print("See df_x", df_x)
 print("See df_y", df_y)
 # Register Pandas Dataframe
