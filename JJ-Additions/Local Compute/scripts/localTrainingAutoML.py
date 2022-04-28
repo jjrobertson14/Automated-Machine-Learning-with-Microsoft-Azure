@@ -2,8 +2,6 @@ from azureml.core import Workspace, Dataset, Datastore
 from azureml.core.run import Run
 from azureml.interpret import ExplanationClient
 
-import pandas as pd
-
 import os
 import sys
 import getopt
@@ -25,7 +23,6 @@ long_options = [
     'subscription-id=', 
     'resource-group=',
     'datastore-name=',
-    'dataset-name=',
     'out-model-file-name=',
     'features='
 ]
@@ -46,8 +43,6 @@ for opt, arg in opts:
         p_resource_group = arg
     elif opt == '--datastore-name':
         p_datastore_name = arg
-    elif opt == '--dataset-name':
-        p_dataset_name = arg
     elif opt == '--out-model-file-name':
         p_out_model_file_name = arg
     elif opt == '--features':
@@ -179,5 +174,3 @@ print('sorted_local_importance_values: ', sorted_local_importance_values)
 # print('localFeatureExplanations: ', localFeatureExplanations)
 
 exit(0)
-# TODO Remove setting of "p_dataset_name"
-# TODO remove now unused imports
