@@ -174,3 +174,8 @@ print('sorted_local_importance_values: ', sorted_local_importance_values)
 # print('localFeatureExplanations: ', localFeatureExplanations)
 
 exit(0)
+
+# TODO get local explanation uploaded, downloaded, and visualized as well, 
+#       for individual feature performance, etc...
+
+# TODO get to appear in visualization's Model Performance tab: the accuracy, precision, f1 scores, false positive rates, false negative rates
