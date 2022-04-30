@@ -1,3 +1,7 @@
+# TODO update to involve zip Notebook and data/ folder
+# TODO check out Conda, 
+# TODO update to set up Python env (installing same verion of python and other dependencies that are currently working)
+# TODO Access and run Notebook in VS Code
 FROM ubuntu:20.04
 
 # Init
