@@ -1,10 +1,3 @@
-# TODO NOTE: Notebook includes Conda usage, 
-#           then continue with Dockerfile creation...
-# Because AzureML System Managed Dependencies are nice
-
-
-
-
 # TODO update to involve install dependencies / set up python environment,
 # TODO Access and run Notebook in VS Code
 FROM ubuntu:20.04
