@@ -1,8 +1,11 @@
-# TODO update to involve zip Notebook and data/ folder
-# TODO check out Conda, 
-# TODO update to set up Python env (installing same verion of python and other dependencies that are currently working)
+# TODO Check out Conda usage
+# TODO update to involve install dependencies / set up python environment,
 # TODO Access and run Notebook in VS Code
 FROM ubuntu:20.04
+
+# TODO set workdir
+RUN mkdir -p /home/node/app
+WORKDIR /home/node/app
 
 # Init
 ARG DEBIAN_FRONTEND=noninteractive
@@ -13,11 +16,18 @@ ENV TZ=America/New_York
 RUN ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime
 RUN dpkg-reconfigure --frontend noninteractive tzdata
 
-# Run command as rhythm user to get powerline-go
-RUN cd /home/rhythm && sudo -u rhythm go get -u github.com/justjanne/powerline-go && sudo -u rhythm ln -s [run dir path] .
+# TODO install any other dependencies through apt-get
+RUN apt-get update -y &&
 
-# add files to run directory
-# COPY ./home_rhythm.tar.bz2 /home/rhythm
+# TODO install python dependencies
 # RUN [script name - initialize-python-environment for notebook to run in].sh
 
+# TODO add project files
+COPY . .
+
+# TODO Start python with CMD command
+CMD [ "npm", "run", "dev" ]
+
 # At this point should be able to access notebook from VS Code...
+
+# TODO use the USER command?
