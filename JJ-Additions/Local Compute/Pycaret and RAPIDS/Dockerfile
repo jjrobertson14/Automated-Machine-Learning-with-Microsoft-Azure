@@ -84,17 +84,16 @@ RUN sudo pyenv install 3.7.13
 # SciKit Learn packages
 # pip install sklearn.datasets 
 
-# TODO Update and Install any remaining dependencies with apt-get
 # TODO Finish above TODOs and diff pip list at this point with the Docker container's to see what is missing and add the rest of the installations right above here
 
 
 
 
 # TODO set environment variable to create app directory (at top)
-# TODO cd to directory, and run Notebook with name
 # Add project files
 # git clone https://github.com/jjrobertson14/Automated-Machine-Learning-with-Microsoft-Azure.git
 COPY PyCaretBenchmarkNotebook.ipynb /opt/workdir/app/
+# TODO cd to directory, and run Notebook with name
 # ???? cd Automated-Machine-Learning-with-Microsoft-Azure ????
 
 # Run chmod in case it is needed
@@ -103,10 +102,10 @@ RUN chmod u+x /opt/workdir/app/*
 # TODO Start python kernel with CMD command?
 CMD ["python"]
 # CMD [ "npm", "run", "dev" ]
-
 # TODO Start notebook running with CMD command?
 # CMD [ "npm", "run", "dev" ]
 
+# TODO If have to install more stuff, update and Install any remaining dependencies with apt-get, remember ~/.bash_history
 # At this point should be able to access notebook from VS Code...
 
 
