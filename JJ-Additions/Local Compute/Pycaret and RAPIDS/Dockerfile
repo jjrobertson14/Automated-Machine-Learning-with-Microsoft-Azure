@@ -20,56 +20,56 @@ WORKDIR $WORKDIR
 # Update and Install dependencies with apt-get
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update -y && apt-get upgrade -y &&\
-    apt-get install libssl-dev \
-                    zlib1g-dev \
-                    libbz2-dev \
-                    libreadline-dev \
-                    libsqlite3-dev \
-                    llvm \
-                    libncurses5-dev \
-                    libncursesw5-dev \
-                    xz-utils \
-                    tk-dev \
-                    libgdbm-dev \
-                    lzma \
-                    lzma-dev \
-                    tcl-dev \
-                    libxml2-dev \
-                    libxmlsec1-dev \
-                    libffi-dev \
-                    liblzma-dev \
-                    wget \
-                    curl \
-                    make \
-                    build-essential \
-                    python-openssl \
-                    cmake \
-                    libblas-dev \
-                    liblapack-dev \
-                    libatlas-base-dev \
-                    gfortran
+    apt-get install -y libssl-dev \
+                       zlib1g-dev \
+                       libbz2-dev \
+                       libreadline-dev \
+                       libsqlite3-dev \
+                       llvm \
+                       libncurses5-dev \
+                       libncursesw5-dev \
+                       xz-utils \
+                       tk-dev \
+                       libgdbm-dev \
+                       lzma \
+                       lzma-dev \
+                       tcl-dev \
+                       libxml2-dev \
+                       libxmlsec1-dev \
+                       libffi-dev \
+                       liblzma-dev \
+                       wget \
+                       curl \
+                       make \
+                       build-essential \
+                       python-openssl \
+                       cmake \
+                       libblas-dev \
+                       liblapack-dev \
+                       libatlas-base-dev \
+                       gfortran
 
 # (NOTE: Use guide here to install pyenv https://github.com/pyenv/pyenv#installation)
 # (Install python, python 3.7 is good for ML 2022/05/03)
 # Install pyenv
-RUN git clone https://github.com/pyenv/pyenv.git ~/.pyenv && \
-    sudo pyenv install 3.7.13 && \
-    sudo pyenv global 3.7.13 && \
+RUN git clone https://github.com/pyenv/pyenv.git ~/.pyenv &&\
+    sudo pyenv install 3.7.13 &&\
+    sudo pyenv global 3.7.13 &&\
     # Edit .bashrc
-    echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc && \
-    echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc && \
-    echo 'eval "$(pyenv init -)"' >> ~/.bashrc && \
+    echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc &&\
+    echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc &&\
+    echo 'eval "$(pyenv init -)"' >> ~/.bashrc &&\
     # Edit .bash_profile
-    echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bash_profile && \
-    echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bash_profile && \
-    echo 'eval "$(pyenv init -)"' >> ~/.bash_profile && \
+    echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bash_profile &&\
+    echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bash_profile &&\
+    echo 'eval "$(pyenv init -)"' >> ~/.bash_profile &&\
     # Source bash_profile
-    source .bash_profile && \
+    source .bash_profile &&
 
 # Install dependencies with pip
-RUN python -m pip install --upgrade pip && \
-    pip install setuptools  && \
-    pip install --upgrade setuptools && \
+RUN python -m pip install --upgrade pip &&\
+    pip install setuptools  &&\
+    pip install --upgrade setuptools &&\
     pip install ruamel.yaml \
                 wheel \
                 pybind11 \
@@ -79,31 +79,31 @@ RUN python -m pip install --upgrade pip && \
                 mlflow
 
 # AzureML packages
-RUN pip install azureml.core \
+RUN pip install azureml.core \s
             azureml.automl.core \
             azureml.train.automl \
             azureml.train.widgets \
             azureml-mlflow \
-            azureml-interpret \
+            azureml-interpret
 
 # SciKit Learn packages
 RUN pip install sklearn.datasets 
 
-# TODO try `sudo docker build --network=host .` with above diff pip list at this point with the Docker container's to see what is missing and add the rest of the installations right above here
+# TODO Finish above TODOs and try `sudo docker build --network=host .` with above diff pip list at this point with the Docker container's to see what is missing and add the rest of the installations right above here
 
 
 # TODO set environment variable to create app directory (at top) (remember to replace all instances of Automated-Machine-Learning-with-Microsoft-Azure with it)
 # Add project files
 # git clone https://github.com/jjrobertson14/Automated-Machine-Learning-with-Microsoft-Azure.git
-COPY PyCaretBenchmarkNotebook.ipynb /opt/workdir/app/
+# COPY PyCaretBenchmarkNotebook.ipynb /opt/workdir/app/
 # TODO cd to directory, and run Notebook with name
 # ???? cd Automated-Machine-Learning-with-Microsoft-Azure ????
 
 # Run chmod in case it is needed
-RUN chmod u+x /opt/workdir/app/*
+# RUN chmod u+x /opt/workdir/app/*
 
 # TODO Start python kernel with CMD command?
-CMD ["python"]
+# CMD ["python"]
 # CMD [ "npm", "run", "dev" ]
 # TODO Start notebook running with CMD command?
 # CMD [ "npm", "run", "dev" ]
