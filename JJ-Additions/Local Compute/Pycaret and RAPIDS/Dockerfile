@@ -11,9 +11,10 @@ USER root
 ENV TZ=America/New_York
 
 # Set workdir
-RUN mkdir -p /opt/workdir
-RUN mkdir -p /opt/workdir/app
-WORKDIR /opt/workdir
+ENV WORKDIR=/opt/workdir
+RUN mkdir -p $WORKDIR
+RUN mkdir -p $WORKDIR/app
+WORKDIR $WORKDIR
 
 
 # Update and Install dependencies with apt-get
@@ -48,45 +49,47 @@ RUN apt-get update -y && apt-get upgrade -y &&\
                     libatlas-base-dev \
                     gfortran
 
-# TODO: Use guide here to install pyenv https://github.com/pyenv/pyenv#installation
-# Install python, python 3.7 is good for ML 2022/05/03
-RUN sudo pyenv install 3.7.13
-# git clone https://github.com/pyenv/pyenv.git ~/.pyenv
-# pyenv install 3.7.13
-# pyenv global 3.7.13
-# ???? pyenv  version-origin ????
-# TODO edit .bashrc
-# TODO edit .bash_profile
-# source .bash_profile
+# (NOTE: Use guide here to install pyenv https://github.com/pyenv/pyenv#installation)
+# (Install python, python 3.7 is good for ML 2022/05/03)
+# Install pyenv
+RUN git clone https://github.com/pyenv/pyenv.git ~/.pyenv && \
+    sudo pyenv install 3.7.13 && \
+    sudo pyenv global 3.7.13 && \
+    # Edit .bashrc
+    echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc && \
+    echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc && \
+    echo 'eval "$(pyenv init -)"' >> ~/.bashrc && \
+    # Edit .bash_profile
+    echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bash_profile && \
+    echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bash_profile && \
+    echo 'eval "$(pyenv init -)"' >> ~/.bash_profile && \
+    # Source bash_profile
+    source .bash_profile && \
 
 # Install dependencies with pip
-# python -m pip install --upgrade pip
-# pip install setuptools \
-# pip install --upgrade setuptools
-
-# pip install ruamel.yaml \
-# azureml.train.automl \
-# wheel \
-# pybind11 \
-# Cython \
-# scipy \
-# numpy \
-# mlflow
+RUN python -m pip install --upgrade pip && \
+    pip install setuptools  && \
+    pip install --upgrade setuptools && \
+    pip install ruamel.yaml \
+                wheel \
+                pybind11 \
+                Cython \
+                scipy \
+                numpy \
+                mlflow
 
 # AzureML packages
-# pip install azureml.core
-# azureml.automl.core \
-# azureml.train.automl \
-# azureml.train.widgets \
-# azureml-mlflow \
-# azureml-interpret \
+RUN pip install azureml.core \
+            azureml.automl.core \
+            azureml.train.automl \
+            azureml.train.widgets \
+            azureml-mlflow \
+            azureml-interpret \
 
 # SciKit Learn packages
-# pip install sklearn.datasets 
+RUN pip install sklearn.datasets 
 
-# TODO Finish above TODOs and diff pip list at this point with the Docker container's to see what is missing and add the rest of the installations right above here
-
-
+# TODO try `sudo docker build --network=host .` with above diff pip list at this point with the Docker container's to see what is missing and add the rest of the installations right above here
 
 
 # TODO set environment variable to create app directory (at top) (remember to replace all instances of Automated-Machine-Learning-with-Microsoft-Azure with it)
