@@ -79,7 +79,7 @@ RUN python -m pip install --upgrade pip &&\
                 mlflow
 
 # AzureML packages
-RUN pip install azureml.core \s
+RUN pip install azureml.core \
             azureml.automl.core \
             azureml.train.automl \
             azureml.train.widgets \
@@ -88,6 +88,8 @@ RUN pip install azureml.core \s
 
 # SciKit Learn packages
 RUN pip install sklearn.datasets 
+
+CMD pip list
 
 # TODO Diff pip list at this point with the Docker container's to see what is missing and add the rest of the installations right above here
 
