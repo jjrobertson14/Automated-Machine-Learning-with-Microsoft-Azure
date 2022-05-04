@@ -118,6 +118,7 @@ CMD pip list
 
 
 # MORE TODOS
+# TODO Move installations into separate Dockerfiles that inherit from each other?
 # TODO create tutorial (and/or start script) in the git repo to install docker and nvidia stuff to run...
 # WARNING: UNTESTED
 # Run in WSL2
