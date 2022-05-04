@@ -113,9 +113,32 @@ CMD ["python"]
 
 
 # MORE TODOS
-# TODO create start script in the git repo to install docker and nvidia stuff to run...
+# TODO create tutorial (and/or start script) in the git repo to install docker and nvidia stuff to run...
 # WARNING: UNTESTED
 # Run in WSL2
+#
+# Links for help: 
+# - Cuda processing on WSL2 and example containers to benchmark GPU usage: https://docs.nvidia.com/cuda/wsl-user-guide/index.html
+# - PyCaret: https://pycaret.gitbook.io/docs/get-started/tutorials
+# - Nvidia RAPIDS with PyCaret: https://developer.nvidia.com/blog/streamline-your-model-builds-with-pycaret-rapids-on-nvidia-gpus/
+#
+# (Steps from https://docs.nvidia.com/cuda/wsl-user-guide/index.html)
+# Step 1: Install NVIDIA Driver for GPU Support
+# Download and install NVIDIA GeForce Game Ready or NVIDIA RTX Quadro Windows 11 display driver on your system with a compatible GeForce or NVIDIA RTX/Quadro card from
+# https://developer.nvidia.com/cuda/wsl
+# 
+# Note: This is the only driver you need to install. Do not install any Linux display driver in WSL.
+# 
+#
+# Step 2. Install WSL 2
+# 1. Launch your preferred Windows Terminal / Command Prompt / Powershell and install WSL:
+# wsl.exe --install
+# 2. Ensure you have the latest WSL kernel:
+# wsl.exe --update
+# 3. Run WSL 2
+# wsl.exe
+#
+# Now set up Docker and install nvidia-docker and cuda / wsl-ubuntu-11-4 packages 
 # From home dir...
 # 
 # sudo apt-get update && sudo apt-get upgrade
@@ -135,7 +158,6 @@ CMD ["python"]
 # sudo apt-key add /var/cuda-repo-wsl-ubuntu-11-4-local/7fa2af80.pub
 # sudo apt-get update && apt-get -y install cuda
 # 
-# TEST IT
+# Now Test the installed packages by running these docker containers from Main Docker Image Repository
 # sudo docker run --cpu all nvcr.io/nvidia/k8s/cuda-sample:nbody nbody -gpu -benchmark
 # docker run -it --gpus all -p 8888:8888 tensorflow/tensorflow:latest-gpu-py3-jupyter
-
