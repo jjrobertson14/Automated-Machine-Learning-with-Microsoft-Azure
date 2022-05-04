@@ -17,7 +17,7 @@ RUN mkdir -p /opt/workdir
 RUN mkdir -p /opt/workdir/app
 WORKDIR /opt/workdir
 
-# TODO Determine dependencies necessary for the notebook to run in WSL2
+# TODO determine dependencies necessary for the notebook to run in WSL2
 # TODO Update and Install dependencies with apt-get
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update -y && apt-get upgrade -y &&\
