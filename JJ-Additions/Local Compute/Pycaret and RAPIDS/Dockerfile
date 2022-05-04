@@ -1,3 +1,5 @@
+# Build with this to use the host network for downloads docker build --network=host .
+
 # TODO make sure this works to Bind Mount the data files dir
 # Run with Volume with `docker run -v $(pwd)/data:/opt/workdir bash:latest /`
 
@@ -7,24 +9,22 @@
 FROM ubuntu:20.04
 USER root
 
+# Set timezone
+ENV TZ=America/New_York
+
 # Set workdir
 RUN mkdir -p /opt/workdir
 RUN mkdir -p /opt/workdir/app
 WORKDIR /opt/workdir
 
-# Init
+# TODO Determine dependencies necessary for the notebook to run in WSL2
+# TODO Update and Install dependencies with apt-get
 ARG DEBIAN_FRONTEND=noninteractive
-RUN apt-get update -y && apt-get upgrade -y
+RUN apt-get update -y && apt-get upgrade -y &&\
+    apt-get install stuff \
+    more-stuff \
 
-# Set timezone
-ENV TZ=America/New_York
-RUN ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime
-RUN dpkg-reconfigure --frontend noninteractive tzdata
-
-# TODO Install any other dependencies through apt-get
-# RUN apt-get update -y &&
-
-# TODO Install python dependencies
+# TODO Install python dependencies with pip
 # RUN [script name - initialize-python-environment for notebook to run in].sh
 
 # Add project files
