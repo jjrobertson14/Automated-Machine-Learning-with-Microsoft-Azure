@@ -21,6 +21,7 @@ WORKDIR $WORKDIR
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update -y && apt-get upgrade -y &&\
     apt-get install -y git \
+                       pip \
                        libssl-dev \
                        zlib1g-dev \
                        libbz2-dev \
@@ -54,8 +55,6 @@ RUN apt-get update -y && apt-get upgrade -y &&\
 # (Install python, python 3.7 is good for ML 2022/05/03)
 # Install pyenv
 RUN git clone https://github.com/pyenv/pyenv.git ~/.pyenv &&\
-    pyenv install 3.7.13 &&\
-    pyenv global 3.7.13 &&\
     # Edit .bashrc
     echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc &&\
     echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc &&\
@@ -65,10 +64,12 @@ RUN git clone https://github.com/pyenv/pyenv.git ~/.pyenv &&\
     echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bash_profile &&\
     echo 'eval "$(pyenv init -)"' >> ~/.bash_profile &&\
     # Source bash_profile
-    source .bash_profile
+    . ~/.bash_profile &&\
+    pyenv install 3.7.13 &&\
+    pyenv global 3.7.13
 
 # Install dependencies with pip
-RUN python -m pip install --upgrade pip &&\
+RUN python3 -m pip install --upgrade pip &&\
     pip install setuptools  &&\
     pip install --upgrade setuptools &&\
     pip install ruamel.yaml \
