@@ -73,16 +73,17 @@ RUN sudo pyenv install 3.7.13
 # numpy \
 # mlflow
 
+# AzureML packages
 # pip install azureml.core
-# pip install azureml.automl.core
-# pip install azureml.train.automl
-# pip install azureml.train.widgets
-# pip install azureml-mlflow
-# pip install azureml-interpret
+# azureml.automl.core \
+# azureml.train.automl \
+# azureml.train.widgets \
+# azureml-mlflow \
+# azureml-interpret \
 
-# pip install sklearn.datasets
+# SciKit Learn packages
+# pip install sklearn.datasets 
 
-# pip install raiwidgets
 # TODO Update and Install any remaining dependencies with apt-get
 # TODO Finish above TODOs and diff pip list at this point with the Docker container's to see what is missing and add the rest of the installations right above here
 
