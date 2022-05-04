@@ -2,7 +2,7 @@
 # TODO access and run Notebook in VS Code
 # Build with this to use the host network for downloads docker build --network=host .
 # TODO make sure this works to Bind Mount the data files dir
-# Run with Volume with `docker run -v $(pwd)/data:/opt/workdir bash:latest /`
+# Run with Volume with `docker run -v $(pwd)/data:/opt/workdir/app/Automated-Machine-Learning-with-Microsoft-Azure/ bash:latest /`
 
 FROM ubuntu:20.04
 USER root
@@ -89,7 +89,7 @@ RUN sudo pyenv install 3.7.13
 
 
 
-# TODO set environment variable to create app directory (at top)
+# TODO set environment variable to create app directory (at top) (remember to replace all instances of Automated-Machine-Learning-with-Microsoft-Azure with it)
 # Add project files
 # git clone https://github.com/jjrobertson14/Automated-Machine-Learning-with-Microsoft-Azure.git
 COPY PyCaretBenchmarkNotebook.ipynb /opt/workdir/app/
@@ -121,6 +121,11 @@ CMD ["python"]
 # - PyCaret: https://pycaret.gitbook.io/docs/get-started/tutorials
 # - Nvidia RAPIDS with PyCaret: https://developer.nvidia.com/blog/streamline-your-model-builds-with-pycaret-rapids-on-nvidia-gpus/
 #
+# ### 11.1.4. Known Limitations (of NVIDIA Container Toolkit on WSL2 requiring use of Docker-CE for Linux inside WSL 2)
+# The following features are not supported in this release:
+# Note that NVIDIA Container Toolkit has not yet been validated with Docker Desktop WSL 2 backend. Use Docker-CE for Linux instead inside your WSL 2 Linux distribution.
+# CUDA debugging or profiling tools are not supported in WSL 2. This capability will be added in a future release.
+
 # (Steps from https://docs.nvidia.com/cuda/wsl-user-guide/index.html)
 # Step 1: Install NVIDIA Driver for GPU Support
 # Download and install NVIDIA GeForce Game Ready or NVIDIA RTX Quadro Windows 11 display driver on your system with a compatible GeForce or NVIDIA RTX/Quadro card from
