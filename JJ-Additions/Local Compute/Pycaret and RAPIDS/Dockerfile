@@ -20,7 +20,8 @@ WORKDIR $WORKDIR
 # Update and Install dependencies with apt-get
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update -y && apt-get upgrade -y &&\
-    apt-get install -y libssl-dev \
+    apt-get install -y git
+                       libssl-dev \
                        zlib1g-dev \
                        libbz2-dev \
                        libreadline-dev \
