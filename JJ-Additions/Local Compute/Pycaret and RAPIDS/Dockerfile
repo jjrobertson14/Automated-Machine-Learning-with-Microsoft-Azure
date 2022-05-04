@@ -89,7 +89,7 @@ RUN pip install azureml.core \s
 # SciKit Learn packages
 RUN pip install sklearn.datasets 
 
-# TODO Finish above TODOs and try `sudo docker build --network=host .` with above diff pip list at this point with the Docker container's to see what is missing and add the rest of the installations right above here
+# TODO Diff pip list at this point with the Docker container's to see what is missing and add the rest of the installations right above here
 
 
 # TODO set environment variable to create app directory (at top) (remember to replace all instances of Automated-Machine-Learning-with-Microsoft-Azure with it)
