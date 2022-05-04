@@ -54,8 +54,8 @@ RUN apt-get update -y && apt-get upgrade -y &&\
 # (Install python, python 3.7 is good for ML 2022/05/03)
 # Install pyenv
 RUN git clone https://github.com/pyenv/pyenv.git ~/.pyenv &&\
-    sudo pyenv install 3.7.13 &&\
-    sudo pyenv global 3.7.13 &&\
+    pyenv install 3.7.13 &&\
+    pyenv global 3.7.13 &&\
     # Edit .bashrc
     echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc &&\
     echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc &&\
