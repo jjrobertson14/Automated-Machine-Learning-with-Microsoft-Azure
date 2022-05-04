@@ -64,7 +64,7 @@ RUN git clone https://github.com/pyenv/pyenv.git ~/.pyenv &&\
     echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bash_profile &&\
     echo 'eval "$(pyenv init -)"' >> ~/.bash_profile &&\
     # Source bash_profile
-    source .bash_profile &&
+    source .bash_profile
 
 # Install dependencies with pip
 RUN python -m pip install --upgrade pip &&\
