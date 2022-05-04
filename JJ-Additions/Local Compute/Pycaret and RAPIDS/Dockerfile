@@ -79,7 +79,7 @@ RUN python3 -m pip install --upgrade pip &&\
                 scipy \
                 numpy \
                 mlflow \
-                ez_setup
+                pip ez_setup
 
 # AzureML packages
 RUN pip install azureml.core \
