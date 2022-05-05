@@ -1,7 +1,7 @@
-# TODO access and run Notebook in VS Code
+# TODO run Notebook and access in browser
 # Build with this to use the host network for downloads docker build --network=host .
 # TODO make sure this works to Bind Mount the data files dir
-# Run with Volume with `docker run -v $(pwd)/data:/opt/workdir/app/Automated-Machine-Learning-with-Microsoft-Azure/ bash:latest /`
+# Run with Volume with `docker run -v $(pwd)/data:/opt/workdir/app/Automated-Machine-Learning-with-Microsoft-Azure/ [image]:[tag] /`
 
 FROM ubuntu:20.04
 USER root
@@ -111,29 +111,22 @@ RUN . ~/.bash_profile &&\
 # Output installed pip packages to requirements.txt and export it out of container
 RUN pip freeze > requirements.txt
 
-# TODO set environment variable to create app directory (at top) (remember to replace all instances of Automated-Machine-Learning-with-Microsoft-Azure with it)
 # Add project files
-# git clone https://github.com/jjrobertson14/Automated-Machine-Learning-with-Microsoft-Azure.git
-# COPY PyCaretBenchmarkNotebook.ipynb /opt/workdir/app/
-# TODO cd to directory, and run Notebook with name
-# ???? cd Automated-Machine-Learning-with-Microsoft-Azure ????
-
+RUN git clone https://github.com/jjrobertson14/Automated-Machine-Learning-with-Microsoft-Azure.git
+COPY PyCaretBenchmarkNotebook.ipynb /opt/workdir/app/
 # Run chmod in case it is needed
-# RUN chmod u+x /opt/workdir/app/*
+RUN chmod u+x /opt/workdir/app/*
 
-# TODO Start python kernel with CMD command?
-# CMD ["python"]
-# CMD [ "npm", "run", "dev" ]
-# TODO Start notebook running with CMD command?
-# CMD [ "npm", "run", "dev" ]
+# TODO Start notebook webserver at localhost with CMD command
+CMD [ "jupyter", "notebook", "PyCaretBenchmarkNotebook.ipynb" ]
 
 # TODO If have to install more stuff, update and Install any remaining dependencies with apt-get, remember ~/.bash_history
 # At this point should be able to access notebook from VS Code...
 
 
 
-
 # MORE TODOS
+# TODO set environment variable to create app directory (at top) (remember to replace all instances of Automated-Machine-Learning-with-Microsoft-Azure with it)
 # TODO create tutorial (and/or start script) in the git repo to install docker and nvidia stuff to run...
 # WARNING: UNTESTED
 # Run in WSL2
