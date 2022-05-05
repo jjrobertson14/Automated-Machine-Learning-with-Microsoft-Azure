@@ -8,7 +8,8 @@
 
 # Build with this to use the host network for downloads docker build --network=host .
 # TODO make sure this works to Bind Mount the data files dir
-# Run with Volume with `docker run -v $(pwd)/data:/opt/workdir/app/Automated-Machine-Learning-with-Microsoft-Azure/ [image]:[tag] /`
+# Run with Volume with `docker run -it --rm --gpus all -v $(pwd)/data:/opt/workdir/app/Automated-Machine-Learning-with-Microsoft-Azure/data [image]:[tag] /`
+#  docker run -it --rm --gpus all ubuntu nvidia-smi
 
 FROM ubuntu:20.04
 USER root
@@ -134,6 +135,15 @@ CMD [ "jupyter", "notebook", "PyCaretBenchmarkNotebook.ipynb" ]
 
 # MORE TODOS
 # TODO set environment variable to create app directory (at top) (remember to replace all instances of Automated-Machine-Learning-with-Microsoft-Azure with it)
+# ARG build-time args (--build-arg)
+#
+# You can use ENV instructions in a Dockerfile to define variable values. These values persist in the built image. 
+# However, often persistence is not what you want. Users want to specify variables differently depending on which host they build an image on.
+# The ARG instruction lets Dockerfile authors define values that users can set at build-time using the --build-arg flag:
+#    docker build --build-arg HTTP_PROXY=http://10.20.30.2:1234 --build-arg FTP_PROXY=http://40.50.60.5:4567 .
+# This flag allows you to pass the build-time variables that are accessed like regular environment variables in the RUN instruction of the Dockerfile. Also, these values don’t persist in the intermediate or final images like ENV values do. You must add --build-arg for each build argument.
+
+
 # TODO create tutorial (and/or start script) in the git repo to install docker and nvidia stuff to run...
 # WARNING: UNTESTED
 # Run in WSL2
