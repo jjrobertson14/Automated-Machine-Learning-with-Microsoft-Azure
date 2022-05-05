@@ -1,4 +1,11 @@
-# TODO run Notebook and access in browser
+# TODO build with image repository and tag names, to manage the image, 
+# TDOO then run with the docker run command below
+
+
+
+
+
+
 # Build with this to use the host network for downloads docker build --network=host .
 # TODO make sure this works to Bind Mount the data files dir
 # Run with Volume with `docker run -v $(pwd)/data:/opt/workdir/app/Automated-Machine-Learning-with-Microsoft-Azure/ [image]:[tag] /`
