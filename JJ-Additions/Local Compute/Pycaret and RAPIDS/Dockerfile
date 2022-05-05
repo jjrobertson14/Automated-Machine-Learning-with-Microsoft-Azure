@@ -1,4 +1,3 @@
-# TODO update to involve install dependencies / set up python environment,
 # TODO access and run Notebook in VS Code
 # Build with this to use the host network for downloads docker build --network=host .
 # TODO make sure this works to Bind Mount the data files dir
@@ -68,34 +67,49 @@ RUN git clone https://github.com/pyenv/pyenv.git ~/.pyenv &&\
     pyenv install 3.7.13 &&\
     pyenv global 3.7.13
 
-# Install dependencies with pip
-RUN python3 -m pip install --upgrade pip &&\
+# Upgrade pip and install wheel with it
+RUN cat ~/.bash_profile && . ~/.bash_profile && pyenv versions && which python && which pip &&\
+    python -m pip install --upgrade pip &&\
+    pip install wheel
+
+# Install SciKit Learn and SciPy packages with pip
+RUN . ~/.bash_profile &&\
+    pip install scikit-learn sklearn-pandas scikit-plot scipy &&\
+    pip install --upgrade scikit-learn
+
+# Install PyCaret with pip
+RUN . ~/.bash_profile &&\
+    pip install pycaret
+
+# Install remaining dependencies with pip
+RUN . ~/.bash_profile &&\
     pip install setuptools  &&\
     pip install --upgrade setuptools &&\
     pip install ruamel.yaml \
-                wheel \
                 pybind11 \
                 Cython \
                 scipy \
                 numpy \
                 mlflow \
-                ez_setup
+                ez_setup &&\
+    pip list
 
-# AzureML packages
-RUN pip install azureml.core \
-            azureml.automl.core \
-            azureml.train.automl \
-            azureml.train.widgets \
-            azureml-mlflow \
-            azureml-interpret
+# NOTE: I have previously seen pip install errors:
+    # Go here for all the help you should need for handling Python dependency errors, it's short.
+    #   (https://pip.pypa.io/en/stable/topics/dependency-resolution/#dealing-with-dependency-conflicts)
+    # There are no catch-all solutions except using Conda or Python Poetry.
+    # 
+    # (like "packageX version has requirement packageY>=version, but you'll have packageY version which is incompatible.)
+    # 
+    # (RUN 1:)
+    # yellowbrick 1.4 has requirement scikit-learn>=1.0.0, but you'll have scikit-learn 0.23.2 which is incompatible.
+    # numba 0.54.1 has requirement numpy<1.21,>=1.17, but you'll have numpy 1.22.3 which is incompatible.
+    #
+    # (RUN X:)
+    # Fixed by moving package installations around and removing unneccessary installs (unused AzureML ones mainly). For the fussiest big packages, put install into one RUN command, and install the packages it whines aboute before the RUN command
 
-# SciKit Learn packages
-RUN pip install sklearn.datasets 
-
-CMD pip list
-
-# TODO Diff pip list at this point with the Docker container's to see what is missing and add the rest of the installations right above here
-
+# Output installed pip packages to requirements.txt and export it out of container
+RUN pip freeze > requirements.txt
 
 # TODO set environment variable to create app directory (at top) (remember to replace all instances of Automated-Machine-Learning-with-Microsoft-Azure with it)
 # Add project files
@@ -120,7 +134,6 @@ CMD pip list
 
 
 # MORE TODOS
-# TODO Move installations into separate Dockerfiles that inherit from each other?
 # TODO create tutorial (and/or start script) in the git repo to install docker and nvidia stuff to run...
 # WARNING: UNTESTED
 # Run in WSL2
