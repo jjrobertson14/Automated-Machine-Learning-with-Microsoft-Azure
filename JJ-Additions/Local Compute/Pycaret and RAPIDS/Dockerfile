@@ -54,9 +54,6 @@ RUN apt-get update -y && apt-get upgrade -y &&\
                        gfortran \
                        jupyter
 
-# rm existing python package
-RUN apt-get remove python
-
 # (NOTE: Use guide here to install pyenv https://github.com/pyenv/pyenv#installation)
 # (Install python, python 3.7 is good for ML 2022/05/03)
 # Install pyenv
@@ -76,8 +73,6 @@ RUN git clone https://github.com/pyenv/pyenv.git ~/.pyenv &&\
     # install python 3.7.13 with pyenv
     pyenv install 3.7.13 &&\
     pyenv global 3.7.13
-
-RUN echo "/usr/bin/python after pyenv install" && ls /usr/bin/python    
 
 # Upgrade pip and install packages with it
 RUN cat ~/.bash_profile && . ~/.bash_profile && pyenv versions && which python && which pip &&\
@@ -120,6 +115,8 @@ RUN cat ~/.bash_profile && . ~/.bash_profile && pyenv versions && which python &
 
 # Add project files
 COPY PyCaretBenchmarkNotebook.ipynb .
+
+RUN jupyter kernelspec list
 
 # Start notebook webserver at localhost with CMD command
 # CMD [ "jupyter", "notebook", "PyCaretBenchmarkNotebook.ipynb" ]
