@@ -1,27 +1,25 @@
-# TODO build with image repository and tag names, to manage the image, 
-# TDOO then run with the docker run command below
-
-
-
-
-
-
-# Build with this to use the host network for downloads docker build --network=host .
-# TODO make sure this works to Bind Mount the data files dir
-# Run with Volume with `docker run -it --rm --gpus all -v $(pwd)/data:/opt/workdir/app/Automated-Machine-Learning-with-Microsoft-Azure/data [image]:[tag] /`
-#  docker run -it --rm --gpus all ubuntu nvidia-smi
+# Build with this to use the host network for downloads docker build --network=host --tag=pycaret-rapids:latest .
+# TODO make sure this works with the Bind Mount of the data files dir
+# Run with Volume with `docker run -it --rm --gpus all --mount type=bind,src=$(pwd)/data,dst=/opt/workdir/data PyCaretRAPIDS:latest`
+# docker run -t -i --mount type=bind,src=/data,dst=/data busybox sh
 
 FROM ubuntu:20.04
 USER root
+
+# On ARG and ENV, in case you want to add:
+#   You can use ENV instructions in a Dockerfile to define variable values. These values persist in the built image. 
+#   However, often persistence is not what you want. Users want to specify variables differently depending on which host they build an image on.
+#   The ARG instruction lets Dockerfile authors define values that users can set at build-time using the --build-arg flag:
+#       docker build --build-arg HTTP_PROXY=http://10.20.30.2:1234 --build-arg FTP_PROXY=http://40.50.60.5:4567 .
+#   This flag allows you to pass the build-time variables that are accessed like regular environment variables in the RUN instruction of the Dockerfile. Also, these values don’t persist in the intermediate or final images like ENV values do. You must add --build-arg for each build argument.
 
 # Set Environment Variables
 ENV TZ=America/New_York
 
 # Set workdir
-ENV WORKDIR=/opt/workdir
-RUN mkdir -p $WORKDIR
-RUN mkdir -p $WORKDIR/app
-WORKDIR $WORKDIR
+ENV BASEDIR=/opt/workdir
+RUN mkdir -p $BASEDIR
+WORKDIR $BASEDIR
 
 
 # Update and Install dependencies with apt-get
@@ -120,28 +118,13 @@ RUN . ~/.bash_profile &&\
 RUN pip freeze > requirements.txt
 
 # Add project files
-RUN git clone https://github.com/jjrobertson14/Automated-Machine-Learning-with-Microsoft-Azure.git
-COPY PyCaretBenchmarkNotebook.ipynb /opt/workdir/app/
-# Run chmod in case it is needed
-RUN chmod u+x /opt/workdir/app/*
+COPY PyCaretBenchmarkNotebook.ipynb .
 
-# TODO Start notebook webserver at localhost with CMD command
+# Start notebook webserver at localhost with CMD command
 CMD [ "jupyter", "notebook", "PyCaretBenchmarkNotebook.ipynb" ]
 
 # TODO If have to install more stuff, update and Install any remaining dependencies with apt-get, remember ~/.bash_history
 # At this point should be able to access notebook from VS Code...
-
-
-
-# MORE TODOS
-# TODO set environment variable to create app directory (at top) (remember to replace all instances of Automated-Machine-Learning-with-Microsoft-Azure with it)
-# ARG build-time args (--build-arg)
-#
-# You can use ENV instructions in a Dockerfile to define variable values. These values persist in the built image. 
-# However, often persistence is not what you want. Users want to specify variables differently depending on which host they build an image on.
-# The ARG instruction lets Dockerfile authors define values that users can set at build-time using the --build-arg flag:
-#    docker build --build-arg HTTP_PROXY=http://10.20.30.2:1234 --build-arg FTP_PROXY=http://40.50.60.5:4567 .
-# This flag allows you to pass the build-time variables that are accessed like regular environment variables in the RUN instruction of the Dockerfile. Also, these values don’t persist in the intermediate or final images like ENV values do. You must add --build-arg for each build argument.
 
 
 # TODO create tutorial (and/or start script) in the git repo to install docker and nvidia stuff to run...
