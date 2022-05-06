@@ -71,7 +71,8 @@ RUN git clone https://github.com/pyenv/pyenv.git ~/.pyenv &&\
     # Source bash_profile
     . ~/.bash_profile &&\
     pyenv install 3.7.13 &&\
-    pyenv global 3.7.13
+    pyenv global 3.7.13 &&\
+    export PATH=$PATH:/home/johna/.pyenv/versions/3.7.13
 
 # Upgrade pip and install packages with it
 RUN cat ~/.bash_profile && . ~/.bash_profile && pyenv versions && which python && which pip &&\
