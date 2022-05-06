@@ -74,8 +74,13 @@ RUN git clone https://github.com/pyenv/pyenv.git ~/.pyenv &&\
     pyenv install 3.7.13 &&\
     pyenv global 3.7.13
 
+# Create a virtualenv to install as a python kernel for Jupyter Notebook to use
+RUN . ~/.bash_profile && python -m venv .
+
+# Activate the virtualenv then...
 # Upgrade pip and install packages with it
-RUN cat ~/.bash_profile && . ~/.bash_profile && pyenv versions && which python && which pip &&\
+RUN . ./bin/activate &&\
+    cat ~/.bash_profile && . ~/.bash_profile && pyenv versions && which python && which pip &&\
     python -m pip install --upgrade pip &&\
     python -m pip install wheel \
                 # Install SciKit Learn and SciPy packages with pip
@@ -93,9 +98,9 @@ RUN cat ~/.bash_profile && . ~/.bash_profile && pyenv versions && which python &
                 scipy \
                 numpy \
                 mlflow \
-                ez_setup &&\
-                # Upgrade dependencies
-                # pip install --upgrade scikit-learn setuptools &&\
+                ez_setup \
+                # Install jupyter in the virtualenv
+                jupyter &&\
     python -m pip freeze > requirements.txt &&\
     echo Path is $PATH
 
@@ -116,7 +121,8 @@ RUN cat ~/.bash_profile && . ~/.bash_profile && pyenv versions && which python &
 # Add project files
 COPY PyCaretBenchmarkNotebook.ipynb .
 
-RUN jupyter kernelspec list
+# Add the virtualenv as a jupyter kernel
+RUN jupyter kernelspec install . --name="python-3.7.13"
 
 # Start notebook webserver at localhost with CMD command
 # CMD [ "jupyter", "notebook", "PyCaretBenchmarkNotebook.ipynb" ]
