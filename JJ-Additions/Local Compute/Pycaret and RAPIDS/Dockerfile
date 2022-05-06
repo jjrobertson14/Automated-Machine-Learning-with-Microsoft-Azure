@@ -1,7 +1,6 @@
 # Build with this to use the host network for downloads docker build --network=host --tag=pycaret-rapids:latest .
 # TODO make sure this works with the Bind Mount of the data files dir
-# Run with Volume with `docker run -it --rm --gpus all --mount type=bind,src=$(pwd)/data,dst=/opt/workdir/data PyCaretRAPIDS:latest`
-# docker run -t -i --mount type=bind,src=/data,dst=/data busybox sh
+# Run with Volume with `docker run --rm --gpus all --network=host --mount type=bind,src="$(pwd)/data",target=/opt/workdir/data pycaret-rapids:latest`
 
 FROM ubuntu:20.04
 USER root
@@ -54,7 +53,8 @@ RUN apt-get update -y && apt-get upgrade -y &&\
                        libblas-dev \
                        liblapack-dev \
                        libatlas-base-dev \
-                       gfortran
+                       gfortran \
+                       jupyter
 
 # (NOTE: Use guide here to install pyenv https://github.com/pyenv/pyenv#installation)
 # (Install python, python 3.7 is good for ML 2022/05/03)
@@ -73,32 +73,29 @@ RUN git clone https://github.com/pyenv/pyenv.git ~/.pyenv &&\
     pyenv install 3.7.13 &&\
     pyenv global 3.7.13
 
-# Upgrade pip and install wheel with it
+# Upgrade pip and install packages with it
 RUN cat ~/.bash_profile && . ~/.bash_profile && pyenv versions && which python && which pip &&\
     python -m pip install --upgrade pip &&\
-    pip install wheel
-
-# Install SciKit Learn and SciPy packages with pip
-RUN . ~/.bash_profile &&\
-    pip install scikit-learn sklearn-pandas scikit-plot scipy &&\
-    pip install --upgrade scikit-learn
-
-# Install PyCaret with pip
-RUN . ~/.bash_profile &&\
-    pip install pycaret
-
-# Install remaining dependencies with pip
-RUN . ~/.bash_profile &&\
-    pip install setuptools  &&\
-    pip install --upgrade setuptools &&\
-    pip install ruamel.yaml \
+    python -m pip install wheel \
+                # Install SciKit Learn and SciPy packages with pip
+                scikit-learn \
+                sklearn-pandas \
+                scikit-plot \
+                scipy \
+                # Install PyCaret with pip
+                pycaret \
+                # Install remaining dependencies with pip
+                setuptools \
+                ruamel.yaml \
                 pybind11 \
                 Cython \
                 scipy \
                 numpy \
                 mlflow \
                 ez_setup &&\
-    pip list
+                # Upgrade dependencies
+                # pip install --upgrade scikit-learn setuptools &&\
+    python -m pip freeze > requirements.txt
 
 # NOTE: I have previously seen pip install errors:
     # Go here for all the help you should need for handling Python dependency errors, it's short.
@@ -114,14 +111,12 @@ RUN . ~/.bash_profile &&\
     # (RUN X:)
     # Fixed by moving package installations around and removing unneccessary installs (unused AzureML ones mainly). For the fussiest big packages, put install into one RUN command, and install the packages it whines aboute before the RUN command
 
-# Output installed pip packages to requirements.txt and export it out of container
-RUN pip freeze > requirements.txt
-
 # Add project files
 COPY PyCaretBenchmarkNotebook.ipynb .
 
 # Start notebook webserver at localhost with CMD command
-CMD [ "jupyter", "notebook", "PyCaretBenchmarkNotebook.ipynb" ]
+# CMD [ "jupyter", "notebook", "PyCaretBenchmarkNotebook.ipynb" ]
+ENTRYPOINT [ "jupyter", "notebook", "--ip='*'", "--port=8888", "--allow-root", "PyCaretBenchmarkNotebook.ipynb" ]
 
 # TODO If have to install more stuff, update and Install any remaining dependencies with apt-get, remember ~/.bash_history
 # At this point should be able to access notebook from VS Code...
