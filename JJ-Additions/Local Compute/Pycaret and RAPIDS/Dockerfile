@@ -1,7 +1,7 @@
 # Build with this to use the host network for downloads docker build --network=host --tag=pycaret-rapids:latest .
 # Run with Volume with `docker run --rm --gpus all --network=host --mount type=bind,src="$(pwd)/data",target=/opt/workdir/data pycaret-rapids:latest`
 
-FROM ubuntu:20.04
+FROM ubuntu:20.04 as build
 USER root
 
 # On ARG and ENV, in case you want to add:
@@ -19,40 +19,42 @@ ENV BASEDIR=/opt/workdir
 RUN mkdir -p $BASEDIR
 WORKDIR $BASEDIR
 
+# Create output directory
+RUN mkdir $BASEDIR/outputLocal
 
 # Update and Install dependencies with apt-get
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update -y && apt-get upgrade -y &&\
-    apt-get install -y git \
-                       pip \
-                       libssl-dev \
-                       zlib1g-dev \
+    apt-get install -y build-essential \
+                       cmake \
+                       curl \
+                       gfortran \
+                       git \
+                       jupyter \
+                       libatlas-base-dev \
+                       libblas-dev \
                        libbz2-dev \
-                       libreadline-dev \
-                       libsqlite3-dev \
-                       llvm \
+                       libffi-dev \
+                       libgdbm-dev \
+                       liblapack-dev \
+                       liblzma-dev \
                        libncurses5-dev \
                        libncursesw5-dev \
-                       xz-utils \
-                       tk-dev \
-                       libgdbm-dev \
-                       lzma \
-                       lzma-dev \
-                       tcl-dev \
+                       libreadline-dev \
+                       libsqlite3-dev \
+                       libssl-dev \
                        libxml2-dev \
                        libxmlsec1-dev \
-                       libffi-dev \
-                       liblzma-dev \
-                       wget \
-                       curl \
+                       llvm \
+                       lzma \
+                       lzma-dev \
                        make \
-                       build-essential \
-                       cmake \
-                       libblas-dev \
-                       liblapack-dev \
-                       libatlas-base-dev \
-                       gfortran \
-                       jupyter
+                       pip \
+                       tcl-dev \
+                       tk-dev \
+                       wget \
+                       xz-utils \
+                       zlib1g-dev
 
 # (NOTE: Use guide here to install pyenv https://github.com/pyenv/pyenv#installation)
 # (Install python, python 3.7 is good for ML 2022/05/03)
@@ -82,26 +84,25 @@ RUN . ~/.bash_profile && python -m venv .
 RUN . ./bin/activate &&\
     cat ~/.bash_profile && . ~/.bash_profile && pyenv versions && which python && which pip &&\
     python -m pip install --upgrade pip &&\
-    python -m pip install wheel \
-                # Install SciKit Learn and SciPy packages with pip
-                scikit-learn \
-                sklearn-pandas \
-                scikit-plot \
-                scipy \
-                # Install PyCaret with pip
-                pycaret \
-                # Install remaining dependencies with pip
-                setuptools \
-                ruamel.yaml \
-                pybind11 \
-                Cython \
-                scipy \
-                numpy \
-                mlflow \
-                ez_setup \
-                # Install jupyter in the virtualenv
-                jupyter \
-                ipykernel &&\
+    python -m pip install Cython \
+                          ez_setup \
+                          mlflow \
+                          numpy \
+                          pybind11 \
+                          ruamel.yaml \
+                          scipy \
+                          setuptools \
+                          wheel \
+                          # Install SciKit Learn and SciPy packages with pip
+                          scikit-learn \
+                          sklearn-pandas \
+                          scikit-plot \
+                          scipy \
+                          # Install PyCaret with pip
+                          pycaret \
+                          # Install jupyter in the virtualenv
+                          ipykernel \
+                          jupyter &&\
     python -m pip freeze > requirements.txt &&\
     echo Path is $PATH
     # Add the virtualenv as a jupyter kernel
@@ -128,8 +129,14 @@ RUN . ~/.bash_profile && jupyter kernelspec install . --user --name="python-3.7.
 # Add project files
 COPY PyCaretBenchmarkNotebook.ipynb .
 
+# TODO implement multi-stage deployment to have a single layer image
+#   FROM build
+# TODO rerun build, commit Dockerfile, and then do following...
+# TODO try using alpine base image at the top, get build to work, get run to work
+#   FROM alpine:3.14
+# TODO rerun build, commit Dockerfile
+#           Could take in python packages, required apt packages, and the notebook. Requires copy of files from first image into the second FROM <base image>
 # Start notebook webserver at localhost with CMD command
-# CMD [ "jupyter", "notebook", "PyCaretBenchmarkNotebook.ipynb" ]
 ENTRYPOINT [ "jupyter", "notebook", "--ip='*'", "--port=8888", "--allow-root", "PyCaretBenchmarkNotebook.ipynb" ]
 
 # At this point should be able to access notebook from VS Code...
