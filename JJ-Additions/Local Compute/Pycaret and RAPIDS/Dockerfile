@@ -78,7 +78,7 @@ RUN apt-get update -y && apt-get upgrade -y &&\
 #             tk-dev \
 #             wget
 
-s# (NOTE: Use guide here to install pyenv https://github.com/pyenv/pyenv#installation)
+# (NOTE: Use guide here to install pyenv https://github.com/pyenv/pyenv#installation)
 # (Install python, python 3.7 is good for ML 2022/05/03)
 # Install pyenv
 RUN git clone https://github.com/pyenv/pyenv.git ~/.pyenv &&\
