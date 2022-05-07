@@ -56,7 +56,27 @@ RUN apt-get update -y && apt-get upgrade -y &&\
                        xz-utils \
                        zlib1g-dev
 
-# (NOTE: Use guide here to install pyenv https://github.com/pyenv/pyenv#installation)
+# TODO try using alpine base image at the top, get build to work, get run to work
+#   FROM alpine:3.14
+# TODO for Alpine, use this install list instead, and resolve error "C compiler cannot create executables" on running pyenv install 3.7.13
+# Worked with alpine Linux base image...
+# RUN apk update && apk upgrade &&\
+#     apk add bash \
+#             cmake \
+#             curl \
+#             gcc \
+#             gfortran \
+#             git \
+#             libffi-dev \
+#             libxml2-dev \
+#             llvm \
+#             make \
+#             patch \
+#             tcl-dev \
+#             tk-dev \
+#             wget
+
+s# (NOTE: Use guide here to install pyenv https://github.com/pyenv/pyenv#installation)
 # (Install python, python 3.7 is good for ML 2022/05/03)
 # Install pyenv
 RUN git clone https://github.com/pyenv/pyenv.git ~/.pyenv &&\
@@ -130,12 +150,9 @@ FROM build
 
 # Add project files
 COPY PyCaretBenchmarkNotebook.ipynb .
-# TODO try using alpine base image at the top, get build to work, get run to work
-#   FROM alpine:3.14
-# TODO rerun build, commit Dockerfile
 #           Could take in python packages, required apt packages, and the notebook. Requires copy of files from first image into the second FROM <base image>
 # Start notebook webserver at localhost with CMD command
 ENTRYPOINT [ "jupyter", "notebook", "--ip='*'", "--port=8888", "--allow-root", "PyCaretBenchmarkNotebook.ipynb" ]
 
 # At this point should be able to access notebook from VS Code...
-# TODO optimize build
+# TODO optimize build more (I feel like significant amount of space could be saved considering image size is 3.35GB for me...)
