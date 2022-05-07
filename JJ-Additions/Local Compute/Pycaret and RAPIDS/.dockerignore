@@ -1,2 +1,6 @@
 *.log
-README.md
+*.md
+data/*
+outputLocal/*
+.gitignore
+requirements.txt
