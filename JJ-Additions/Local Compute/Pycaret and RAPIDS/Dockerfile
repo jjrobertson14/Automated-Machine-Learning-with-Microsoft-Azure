@@ -58,7 +58,9 @@ RUN apt-get update -y && apt-get upgrade -y &&\
 
 # TODO try using alpine base image at the top, get build to work, get run to work
 #   FROM alpine:3.14
-# TODO for Alpine, use this install list instead, and resolve error "C compiler cannot create executables" on running pyenv install 3.7.13
+# TODO for Alpine, use this install list instead
+# TODO (try using something other than pyenv to resolve error on swapping Ubuntu for Alpine Linux...) 
+#      (resolve error "C compiler cannot create executables" on running pyenv install 3.7.13)
 # Worked with alpine Linux base image...
 # RUN apk update && apk upgrade &&\
 #     apk add bash \
