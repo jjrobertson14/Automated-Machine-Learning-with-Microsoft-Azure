@@ -126,12 +126,10 @@ RUN . ~/.bash_profile && jupyter kernelspec install . --user --name="python-3.7.
     # Fixed by moving package installations around and removing unneccessary installs (unused AzureML ones mainly). For the fussiest big packages, put install into one RUN command, and install the packages it whines aboute before the RUN command
 
 # Done with RUN commands
+FROM build
+
 # Add project files
 COPY PyCaretBenchmarkNotebook.ipynb .
-
-# TODO implement multi-stage deployment to have a single layer image
-#   FROM build
-# TODO rerun build, commit Dockerfile, and then do following...
 # TODO try using alpine base image at the top, get build to work, get run to work
 #   FROM alpine:3.14
 # TODO rerun build, commit Dockerfile
@@ -140,3 +138,4 @@ COPY PyCaretBenchmarkNotebook.ipynb .
 ENTRYPOINT [ "jupyter", "notebook", "--ip='*'", "--port=8888", "--allow-root", "PyCaretBenchmarkNotebook.ipynb" ]
 
 # At this point should be able to access notebook from VS Code...
+# TODO optimize build
