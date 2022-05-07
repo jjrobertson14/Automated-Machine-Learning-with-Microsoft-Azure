@@ -100,10 +100,16 @@ RUN . ./bin/activate &&\
                 mlflow \
                 ez_setup \
                 # Install jupyter in the virtualenv
-                jupyter &&\
+                jupyter \
+                ipykernel &&\
     python -m pip freeze > requirements.txt &&\
     echo Path is $PATH
+    # Add the virtualenv as a jupyter kernel
 
+# help for Kernel install... https://ipython.readthedocs.io/en/stable/install/kernel_install.html
+RUN . ~/.bash_profile && python -m ipykernel install --user
+RUN . ~/.bash_profile && jupyter kernelspec install . --user --name="python-3.7.13"
+    
 # NOTE: I have previously seen pip install errors:
     # Go here for all the help you should need for handling Python dependency errors, it's short.
     #   (https://pip.pypa.io/en/stable/topics/dependency-resolution/#dealing-with-dependency-conflicts)
@@ -118,11 +124,9 @@ RUN . ./bin/activate &&\
     # (RUN X:)
     # Fixed by moving package installations around and removing unneccessary installs (unused AzureML ones mainly). For the fussiest big packages, put install into one RUN command, and install the packages it whines aboute before the RUN command
 
+# Done with RUN commands
 # Add project files
 COPY PyCaretBenchmarkNotebook.ipynb .
-
-# Add the virtualenv as a jupyter kernel
-RUN jupyter kernelspec install . --name="python-3.7.13"
 
 # Start notebook webserver at localhost with CMD command
 # CMD [ "jupyter", "notebook", "PyCaretBenchmarkNotebook.ipynb" ]
