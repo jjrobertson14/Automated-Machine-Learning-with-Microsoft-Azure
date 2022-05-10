@@ -90,7 +90,7 @@ datastore = Datastore.get(ws, p_datastore_name)
 
 # Get DataSet for training from the datastore of the Workspace
 # (having registered them already in Notebook code)
-# (later) TODO: remove hardcoding the names of the datasets to get and allow passing them as a --argument 
+# (later) TODO?: remove hardcoding the names of the datasets to get and allow passing them as a --argument 
 X_train = Dataset.get_by_name(ws, "Titanic Feature Column Data for training (LocalConda notebook)", version = 'latest').to_pandas_dataframe()
 X_test  = Dataset.get_by_name(ws, "Titanic Feature Column Data for testing (LocalConda notebook)", version = 'latest').to_pandas_dataframe()
 y_train = Dataset.get_by_name(ws, "Titanic Target Column Data for training (LocalConda notebook)", version = 'latest').to_pandas_dataframe()
@@ -140,39 +140,24 @@ explainer = TabularExplainer(model_DT,
 
 # BEGIN Get Global Explanations, global as in 'of total data'...
 
-# you can use the training data or the test data here, but test data would allow you to use Explanation Exploration
+# You can use the training data or the test data here, but test data would allow you to use Explanation Exploration
 print("X_test line before explainer.explain_global: \n" + str(X_test))
 global_explanation = explainer.explain_global(X_test)
-# if you used the PFIExplainer in the previous step, use the next line of code instead
-# globa l_explanation = explainer.explain_global(x_train, true_labels=y_train)
-# sorted feature importance values and feature names
+# If you used the PFIExplainer in the previous step, use the next line of code instead
+# global_explanation = explainer.explain_global(x_train, true_labels=y_train)
+# Sorted feature importance values and feature names
 sorted_global_importance_values = global_explanation.get_ranked_global_values()
 sorted_global_importance_names = global_explanation.get_ranked_global_names()
 globalFeatureExplanations = dict(zip(sorted_global_importance_names, sorted_global_importance_values))
 print('globalFeatureExplanations: ', globalFeatureExplanations)
-# alternatively, you can print out a dictionary that holds the top K feature names and values
+# Alternatively, you can print out a dictionary that holds the top K feature names and values
 print('global_explanation.get_feature_importance_dict(): ', global_explanation.get_feature_importance_dict())
 
 # Uploading global model explanation data...
-# the explanation can then be downloaded on any compute
-# multiple explanations can be uploaded
+# The explanation can then be downloaded on any compute
+# Multiple explanations can be uploaded
 client.upload_model_explanation(global_explanation, comment='global explanation: all features')
-# or you can only upload the explanation object with the top k feature info
-#client.upload_model_explanation(global_explanation, top_k=2, comment='global explanation: Only top 2 features')
-
-# BEGIN Get Local Explanation, local as in 'of specified part of data'...
-
-# get explanation for the first few data points in the test set
-local_explanation = explainer.explain_local(X_test[0:5])
-# sorted feature importance values and feature names
-sorted_local_importance_names = local_explanation.get_ranked_local_names()
-print('sorted_local_importance_names: ', sorted_local_importance_names)
-sorted_local_importance_values = local_explanation.get_ranked_local_values()
-print('sorted_local_importance_values: ', sorted_local_importance_values)
-# Warning, there was an error when I ran this, and I left print statements to help
-# localFeatureExplanations = dict(zip(sorted_local_importance_names, sorted_local_importance_values))
-# print('localFeatureExplanations: ', localFeatureExplanations)
-
-exit(0)
+# Or you can only upload the explanation object with the top k feature info
+# client.upload_model_explanation(global_explanation, top_k=2, comment='global explanation: Only top 2 features')
 
 # TODO get to appear in visualization's Model Performance tab: the accuracy, precision, f1 scores, false positive rates, false negative rates
