@@ -156,7 +156,7 @@ print('global_explanation.get_feature_importance_dict(): ', global_explanation.g
 # Uploading global model explanation data...
 # the explanation can then be downloaded on any compute
 # multiple explanations can be uploaded
-client.upload_model_explanation(global_explanation, comment='global explanation: all features')
+client.upload_model_explanation(global_explanation, true_ys=y_test.values.ravel(), comment='global explanation: all features')
 # or you can only upload the explanation object with the top k feature info
 #client.upload_model_explanation(global_explanation, top_k=2, comment='global explanation: Only top 2 features')
 
@@ -174,8 +174,5 @@ print('sorted_local_importance_values: ', sorted_local_importance_values)
 # print('localFeatureExplanations: ', localFeatureExplanations)
 
 exit(0)
-
-# TODO get local explanation uploaded, downloaded, and visualized as well, 
-#       for individual feature performance, etc...
 
 # TODO get to appear in visualization's Model Performance tab: the accuracy, precision, f1 scores, false positive rates, false negative rates
