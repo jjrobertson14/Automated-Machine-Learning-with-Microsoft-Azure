@@ -178,5 +178,3 @@ client.upload_model_explanation(global_explanation, true_ys=y_test.values.ravel(
 # client.upload_model_explanation(sorted_local_importance_values, comment='local explanation for data points 0-5: all features')
 #
 # END Get local explanations of individual predictions
-
-# TODO get to appear in visualization's Model Performance tab: the accuracy, precision, f1 scores, false positive rates, false negative rates
