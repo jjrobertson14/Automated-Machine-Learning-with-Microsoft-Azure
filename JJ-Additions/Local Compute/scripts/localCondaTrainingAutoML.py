@@ -78,7 +78,6 @@ print('ws.name:', ws.name, 'ws.resource_group:', ws.resource_group, 'ws.location
 
 # Set up for Run that is to be linked with the Experiment this script is run with
 run = Run.get_context()
-client = ExplanationClient.from_run(run)
 run.log(name='creating outputs and logs directory...', value=0)
 run.log(os.makedirs('./outputs', exist_ok=True), value=0)
 run.log(os.makedirs('./outputs', exist_ok=True), value=0)
@@ -131,6 +130,8 @@ file.close()
 
 
 # BEGIN Add Explanations 
+# client = ExplanationClient.from_run(run)
+#
 # (Commented out)
 # (Changed this to be in the notebook instead, but this code may be useful to study and/or copy)
 
