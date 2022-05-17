@@ -1,6 +1,11 @@
 from collections import namedtuple, Iterable, OrderedDict
 import numpy as np
 import simplejson as json
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.impute import SimpleImputer
 
 def isnamedtuple(obj):
     """Heuristic check if an object is a namedtuple."""
@@ -23,7 +28,7 @@ def serialize(data):
             "fields": list(data._fields),
             "values": [serialize(getattr(data, f)) for f in data._fields]}}
     if isinstance(data, dict):
-        if all(isinstance(k, basestring) for k in data):
+        if all(isinstance(k, str) for k in data):
             return {k: serialize(v) for k, v in data.iteritems()}
         return {"py/dict": [[serialize(k), serialize(v)] for k, v in data.iteritems()]}
     if isinstance(data, tuple):
@@ -40,6 +45,21 @@ def serialize(data):
         return {"py/numpy.ndarray": {
             "values": data.tolist(),
             "dtype":  str(data.dtype)}}
+    if isinstance(data, Pipeline):
+        return {"py/sklearn.Pipeline": {
+            "steps": [serialize(val) for val in data]
+        }}
+    # TODO finish the rest
+    if isinstance(data, ColumnTransformer):
+        return {"py/sklearn.ColumnTransformer": [serialize(val) for val in data]}
+    if isinstance(data, OneHotEncoder):
+        return {"py/sklearn.OneHotEncoder": [serialize(val) for val in data]}
+    if isinstance(data, StandardScaler):
+        return {"py/sklearn.StandardScaler": [serialize(val) for val in data]}
+    if isinstance(data, SimpleImputer):
+        return {"py/sklearn.SimpleImputer": [serialize(val) for val in data]}
+    if isinstance(data, DecisionTreeClassifier):
+        return {"py/sklearn.DecisionTreeClassifier": [serialize(val) for val in data]}
     raise TypeError("Serialization of Type %s is not supported." % type(data))
 
 def restore(dct):
@@ -63,6 +83,21 @@ def restore(dct):
     if "py/numpy.ndarray" in dct:
         data = dct["py/numpy.ndarray"]
         return np.array(data["values"], dtype=data["dtype"])
+    # TODO test this one
+    if "py/sklearn.Pipeline" in dct:
+        data = dct["py/sklearn.Pipeline"]
+        return Pipeline(steps=data["steps"])
+    # TODO finish the rest
+    if "py/sklearn.ColumnTransformer" in dct:
+        return {"py/sklearn.ColumnTransformer": [serialize(val) for val in data]}
+    if "py/sklearn.OneHotEncoder" in dct:
+        return {"py/sklearn.OneHotEncoder": [serialize(val) for val in data]}
+    if "py/sklearn.StandardScaler" in dct:
+        return {"py/sklearn.StandardScaler": [serialize(val) for val in data]}
+    if "py/sklearn.SimpleImputer" in dct:
+        return {"py/sklearn.SimpleImputer": [serialize(val) for val in data]}
+    if "py/sklearn.DecisionTreeClassifier" in dct:
+        return {"py/sklearn.DecisionTreeClassifier": [serialize(val) for val in data]}
     return dct
 
 def data_to_json(data):
@@ -76,7 +111,7 @@ def nested_equal(v1, v2):
 
     This handles the case where numpy arrays are leaf nodes.
     """
-    if isinstance(v1, basestring) or isinstance(v2, basestring):
+    if isinstance(v1, str) or isinstance(v2, str):
         return v1 == v2
     if isinstance(v1, np.ndarray) or isinstance(v2, np.ndarray):
         return np.array_equal(v1, v2)
