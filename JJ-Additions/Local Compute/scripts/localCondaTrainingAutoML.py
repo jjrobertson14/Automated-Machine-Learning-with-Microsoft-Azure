@@ -2,10 +2,11 @@ from azureml.core import Workspace, Dataset, Datastore
 from azureml.core.run import Run
 from azureml.interpret import ExplanationClient
 
-import os
-import sys
 import getopt
 import joblib
+import os
+import pickle
+import sys
 
 #Importing the Decision Tree from scikit-learn library
 from sklearn.tree import DecisionTreeClassifier
@@ -97,11 +98,15 @@ y_test = Dataset.get_by_name(ws, "Titanic Target Column Data for testing (LocalC
 data = {"train": {"X": X_train, "y": y_train},
         "test": {"X": X_test, "y": y_test}}
 
-# Training the model is as simple as this
-# Use the function imported above and apply fit() on it
-model_DT = DecisionTreeClassifier()
-model_DT.fit(X_train,y_train)
+# Unpickle the SciKit Pipline (that performs Transformation and Model Training)
+with open('classifier_pipeline.pickle', 'rb') as file:
+    classifier_pipeline = pickle.load(file)
+    print(classifier_pipeline)
 
+# Run training Pipeline
+model_DT = classifier_pipeline.fit(X_train,y_train)
+
+# Training the model is as simple as this
 # We use the predict() on the model to predict the output
 prediction = model_DT.predict(X_test)
 
