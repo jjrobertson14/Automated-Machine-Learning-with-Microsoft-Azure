@@ -1,3 +1,5 @@
 ./outputs/*
 ./download_explanation/*
 ./azureml-models/*
+./Pycaret and RAPIDS/*
+./simple_python_to_json/*
