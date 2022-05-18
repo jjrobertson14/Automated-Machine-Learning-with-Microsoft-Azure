@@ -99,7 +99,7 @@ data = {"train": {"X": X_train, "y": y_train},
         "test": {"X": X_test, "y": y_test}}
 
 # Unpickle the SciKit Pipline (that performs Transformation and Model Training)
-with open('classifier_pipeline.pickle', 'rb') as file:
+with open('resources/classifier_pipeline.pickle', 'rb') as file:
     classifier_pipeline = pickle.load(file)
     print(classifier_pipeline)
 
