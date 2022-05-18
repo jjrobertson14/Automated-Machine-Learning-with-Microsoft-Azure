@@ -135,14 +135,79 @@ file.close()
 
 
 # BEGIN Add Explanations 
-# client = ExplanationClient.from_run(run)
+# TODO Save feature names to create TabularExplainer with them, perhaps copy this code from Notebook...
+#     df_encoded_categorical_column_names = one_hot_encoder.get_feature_names(df_categorical_column_names)
+features=[*df_numeric_column_names, *df_categorical_column_names]
+
+from interpret.ext.blackbox import TabularExplainer
+# classifier_pipeline.steps[-1][1] returns the trained classification model
+# pass transformation as an input to create the explanation object
+# "features" and "classes" fields are optional
+classifier_pipeline.fit(X_train, y_train.values.ravel())
+# TODO send preprocessor inside classifier_pipeline in TabularExplainer construction here
+explainer = TabularExplainer(classifier_pipeline.steps[-1][1],
+                                     initialization_examples=X_train,
+                                     features=features,
+                                     transformations=preprocessor)
+# TODO make sure you can see both Raw and Engineered features in the Explanation visualization
+
+# Explain results with Explainer and upload the explanation
+
+# BEGIN Get Global Explanations, global as in 'of total data'...
+
+# You can use the training data or the test data here, but test data would allow you to use Explanation Exploration
+# print("X_test, line value before explainer.explain_global: \n" + str(X_test))
+global_explanation = explainer.explain_global(X_test, y_test)
+# If you used the PFIExplainer in the previous step, use the next line of code instead
+# global_explanation = explainer.explain_global(x_train, true_labels=y_train)
+# Sorted feature importance values and feature names
+sorted_global_importance_values = global_explanation.get_ranked_global_values()
+sorted_global_importance_names = global_explanation.get_ranked_global_names()
+globalFeatureExplanations = dict(zip(sorted_global_importance_names, sorted_global_importance_values))
+print('globalFeatureExplanations: ', globalFeatureExplanations)
+# Alternatively, you can print out a dictionary that holds the top K feature names and values
+print('global_explanation.get_feature_importance_dict(): ', global_explanation.get_feature_importance_dict())
+# Upload global model explanation data...
+
+# The explanation can then be downloaded on any compute
+# Multiple explanations can be uploaded
+# print("y_test value the line before client.upload_model_explanation(): \n" + str(y_test))
+# print("y_test.values.ravel() value passed as true_ys to client.upload_model_explanation(): \n" + str(y_test.values.ravel()))
+client = ExplanationClient.from_run(run)
+client.upload_model_explanation(global_explanation, true_ys=y_test.values.ravel(), comment='global explanation: all features, raw and engineered')
+
+# Or you can only upload the explanation object with the top k feature info with this...
+# client.upload_model_explanation(global_explanation, top_k=2, comment='global explanation: Only top 2 features')
+# END Upload global model explanation data...
+
+
+# BEGIN Get local explanations of individual predictions
+# Get explanation for the first few data points in the test set
+# local_explanation = explainer.explain_local(X_test[0:5])
+# Sorted feature importance values and feature names
+# sorted_local_importance_names = local_explanation.get_ranked_local_names()
+# print('sorted_local_importance_names: ', sorted_local_importance_names)
+# print('len(sorted_local_importance_names): ', len(sorted_local_importance_names))
+# sorted_local_importance_values = local_explanation.get_ranked_local_values()
+# print('sorted_local_importance_values: ', sorted_local_importance_values)
+# print('len(sorted_local_importance_values): ', len(sorted_local_importance_values)) 
+# 
+# THIS DOES NOT WORK LIKE IT DOES WITH THE GLOBAL_EXPLANATION, HOWEVER!
+# client.upload_model_explanation(sorted_local_importance_values, comment='local explanation for data points 0-5: all features')
 #
-# (Commented out)
-# (Changed this to be in the notebook instead, but this code may be useful to study and/or copy)
+# END Get local explanations of individual predictions
 
 
 
 
+
+
+
+
+
+
+
+# BEGIN Old code that was used to get Explanations of Model, when not using a sklearn pipeline to transform features...
 # from interpret.ext.blackbox import TabularExplainer
 
 # # "features" and "classes" fields are optional
