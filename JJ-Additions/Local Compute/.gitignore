@@ -3,3 +3,4 @@ download_explanation/*
 azureml-models/*
 simple_python_to_json/__pycache__/*
 *.pickle
+explanation/*
