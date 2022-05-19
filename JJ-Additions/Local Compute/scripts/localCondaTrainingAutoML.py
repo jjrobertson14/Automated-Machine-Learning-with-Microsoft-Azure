@@ -154,16 +154,17 @@ file.close()
 
 # BEGIN Add Explanations (In terms of both engineered and raw features)
 
-# Save engineered feature names to create TabularExplainer with them, perhaps copy this code from Notebook...
+# BEGIN (If you need engineered feature names for some reason...) Save engineered feature names to create TabularExplainer with them, perhaps copy this code from Notebook...
 # Get OneHotEncoded column names in order to Explain in terms of engineered columns
-from sklearn.preprocessing import OneHotEncoder
-one_hot_encoder = classifier_pipeline['preprocessor'].transformers[1][1][1]
-one_hot_encoder.fit(
-    pd.DataFrame(X_test[p_categoric_feature_names], dtype=np.str, columns=p_categoric_feature_names)
-)
-df_encoded_categorical_feature_names = one_hot_encoder.get_feature_names(p_categoric_feature_names)
+# from sklearn.preprocessing import OneHotEncoder
+# one_hot_encoder = classifier_pipeline['preprocessor'].transformers[1][1][1]
+# one_hot_encoder.fit(
+    # pd.DataFrame(X_test[p_categoric_feature_names], dtype=np.str, columns=p_categoric_feature_names)
+# )
+# df_encoded_categorical_feature_names = one_hot_encoder.get_feature_names(p_categoric_feature_names)
 # Set list of engineeredFeatureNames
-engineeredFeatureNames=[*p_numeric_feature_names, *df_encoded_categorical_feature_names]
+# engineeredFeatureNames=[*p_numeric_feature_names, *df_encoded_categorical_feature_names]
+# END (If you need engineered feature names for some reason...) Save engineered feature names to create TabularExplainer with them, perhaps copy this code from Notebook...
 
 from interpret.ext.blackbox import TabularExplainer
 # classifier_pipeline.steps[-1][1] returns the trained classification model
@@ -173,7 +174,7 @@ classifier_pipeline.fit(X_train, y_train.values.ravel())
 # Send ColumnTransformer preprocessor inside classifier_pipeline in TabularExplainer construction here
 explainer = TabularExplainer(classifier_pipeline.steps[-1][1],
                                      initialization_examples=X_train,
-                                     features=engineeredFeatureNames,
+                                     features=p_feature_names,
                                      transformations=classifier_pipeline['preprocessor'])
 
 # Explain results with Explainer and upload the explanation
@@ -182,7 +183,8 @@ explainer = TabularExplainer(classifier_pipeline.steps[-1][1],
 
 # You can use the training data or the test data here, but test data would allow you to use Explanation Exploration
 # print("X_test, line value before explainer.explain_global: \n" + str(X_test))
-# TODO fix error here. X_test has the 8 raw feature columns in it, I need to pass the transformed X_test somehow...
+# TODO fix error here, or actually just pass raw feature names to the TabularExplainer (and I mean to explain raw features requires engineered feature explanations as input)
+#       X_test has the 8 raw feature columns in it, I need to pass the transformed X_test by getting it with the classifier_pipeline['preprocessor']...
 #           Exception: The number of feature names passed in must be the same as the number of columns in the data.  Number of features: 8 feature names: 61
 #                
 global_explanation = explainer.explain_global(X_test, y_test)
