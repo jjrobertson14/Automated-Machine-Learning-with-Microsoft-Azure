@@ -134,10 +134,15 @@ file.close()
 
 
 
-# BEGIN Add Explanations 
-# TODO Save feature names to create TabularExplainer with them, perhaps copy this code from Notebook...
-#     df_encoded_categorical_column_names = one_hot_encoder.get_feature_names(df_categorical_column_names)
-features=[*df_numeric_column_names, *df_categorical_column_names]
+# BEGIN Add Explanations (In terms of both engineered and raw features)
+
+# TODO Save engineered feature names to create TabularExplainer with them, perhaps copy this code from Notebook...
+# Get OneHotEncoded column names in order to Explain in terms of engineered columns
+from sklearn.preprocessing import OneHotEncoder
+one_hot_encoder = classifier_pipeline['preprocessor'].transformers[1][1][1]
+# df_encoded_categorical_column_names = one_hot_encoder.get_feature_names(p_categorical_features)
+# Set 
+# engineeredFeatures=[*p_numeric_features, *p_categorical_features]
 
 from interpret.ext.blackbox import TabularExplainer
 # classifier_pipeline.steps[-1][1] returns the trained classification model
@@ -147,8 +152,8 @@ classifier_pipeline.fit(X_train, y_train.values.ravel())
 # TODO send preprocessor inside classifier_pipeline in TabularExplainer construction here
 explainer = TabularExplainer(classifier_pipeline.steps[-1][1],
                                      initialization_examples=X_train,
-                                     features=features,
-                                     transformations=preprocessor)
+                                     features=p_features,
+                                     transformations=classifier_pipeline['preprocessor'])
 # TODO make sure you can see both Raw and Engineered features in the Explanation visualization
 
 # Explain results with Explainer and upload the explanation
