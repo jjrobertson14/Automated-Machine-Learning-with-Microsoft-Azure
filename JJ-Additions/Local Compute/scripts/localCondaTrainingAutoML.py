@@ -153,20 +153,9 @@ file.close()
 
 
 # BEGIN Add Explanations (In terms of both engineered and raw features)
-
-# BEGIN (If you need engineered feature names for some reason...) Save engineered feature names to create TabularExplainer with them, perhaps copy this code from Notebook...
-# Get OneHotEncoded column names in order to Explain in terms of engineered columns
-# from sklearn.preprocessing import OneHotEncoder
-# one_hot_encoder = classifier_pipeline['preprocessor'].transformers[1][1][1]
-# one_hot_encoder.fit(
-    # pd.DataFrame(X_test[p_categoric_feature_names], dtype=np.str, columns=p_categoric_feature_names)
-# )
-# df_encoded_categorical_feature_names = one_hot_encoder.get_feature_names(p_categoric_feature_names)
-# Set list of engineeredFeatureNames
-# engineeredFeatureNames=[*p_numeric_feature_names, *df_encoded_categorical_feature_names]
-# END (If you need engineered feature names for some reason...) Save engineered feature names to create TabularExplainer with them, perhaps copy this code from Notebook...
-
 from interpret.ext.blackbox import TabularExplainer
+
+# BEGIN Add Raw Explanations
 # classifier_pipeline.steps[-1][1] returns the trained classification model
 # pass transformation as an input to create the explanation object
 # "features" and "classes" fields are optional
@@ -176,17 +165,11 @@ explainer = TabularExplainer(classifier_pipeline.steps[-1][1],
                                      initialization_examples=X_train,
                                      features=p_feature_names,
                                      transformations=classifier_pipeline['preprocessor'])
+# Explain results with this Explainer and upload the Explanation...
 
-# Explain results with Explainer and upload the explanation
-
-# BEGIN Get Global Explanations, global as in 'of total data'...
-
+# Get Global Explanations of raw features, global as in 'of total data'...
 # You can use the training data or the test data here, but test data would allow you to use Explanation Exploration
 # print("X_test, line value before explainer.explain_global: \n" + str(X_test))
-# TODO fix error here, or actually just pass raw feature names to the TabularExplainer (and I mean to explain raw features requires engineered feature explanations as input)
-#       X_test has the 8 raw feature columns in it, I need to pass the transformed X_test by getting it with the classifier_pipeline['preprocessor']...
-#           Exception: The number of feature names passed in must be the same as the number of columns in the data.  Number of features: 8 feature names: 61
-#                
 global_explanation = explainer.explain_global(X_test, y_test)
 # If you used the PFIExplainer in the previous step, use the next line of code instead
 # global_explanation = explainer.explain_global(x_train, true_labels=y_train)
@@ -197,19 +180,37 @@ globalFeatureExplanations = dict(zip(sorted_global_importance_names, sorted_glob
 print('globalFeatureExplanations: ', globalFeatureExplanations)
 # Alternatively, you can print out a dictionary that holds the top K feature names and values
 print('global_explanation.get_feature_importance_dict(): ', global_explanation.get_feature_importance_dict())
-# Upload global model explanation data...
 
-# The explanation can then be downloaded on any compute
-# Multiple explanations can be uploaded
 # print("y_test value the line before client.upload_model_explanation(): \n" + str(y_test))
 # print("y_test.values.ravel() value passed as true_ys to client.upload_model_explanation(): \n" + str(y_test.values.ravel()))
 client = ExplanationClient.from_run(run)
-# TODO make sure you can see both Raw and Engineered features in the Explanation visualization
-client.upload_model_explanation(global_explanation, true_ys=y_test.values.ravel(), comment='global explanation: all features, raw and engineered')
-
+#           (perhaps can only have Explanation of one of Raw or Engineered features at once?)
+# Upload global model explanation data...
+# The explanation can then be downloaded on any compute
+# Multiple explanations can be uploaded
+client.upload_model_explanation(global_explanation, true_ys=y_test.values.ravel(), comment='global explanation: all features, raw')
 # Or you can only upload the explanation object with the top k feature info with this...
 # client.upload_model_explanation(global_explanation, top_k=2, comment='global explanation: Only top 2 features')
-# END Upload global model explanation data...
+# END Add Raw Explanations
+
+# BEGIN Add Engineered Feature Explanations
+# BEGIN Save engineered feature names to create TabularExplainer with them, perhaps copy this code from Notebook...
+# Get OneHotEncoded column names in order to Explain in terms of engineered columns
+from sklearn.preprocessing import OneHotEncoder
+one_hot_encoder = classifier_pipeline['preprocessor'].transformers[1][1][1]
+one_hot_encoder.fit(
+    pd.DataFrame(X_test[p_categoric_feature_names], dtype=np.str, columns=p_categoric_feature_names)
+)
+df_encoded_categorical_feature_names = one_hot_encoder.get_feature_names(p_categoric_feature_names)
+# Set list of engineeredFeatureNames
+engineeredFeatureNames=[*p_numeric_feature_names, *df_encoded_categorical_feature_names]
+# END Save engineered feature names to create TabularExplainer with them, perhaps copy this code from Notebook...
+# TODO make sure you can see both Raw and Engineered features in the Explanation visualization
+#                   (first, try getting the preprocessed data set to get Engineered Feature Explanations)
+# 
+# client.upload_model_explanation(global_explanation, true_ys=y_test.values.ravel(), comment='global explanation: all features, engineered')
+# END Add Engineered Feature Explanations
+
 
 
 # BEGIN Get local explanations of individual predictions
