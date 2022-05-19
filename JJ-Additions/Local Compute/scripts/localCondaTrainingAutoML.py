@@ -182,7 +182,9 @@ explainer = TabularExplainer(classifier_pipeline.steps[-1][1],
 
 # You can use the training data or the test data here, but test data would allow you to use Explanation Exploration
 # print("X_test, line value before explainer.explain_global: \n" + str(X_test))
-# TODO fix error here
+# TODO fix error here. X_test has the 8 raw feature columns in it, I need to pass the transformed X_test somehow...
+#           Exception: The number of feature names passed in must be the same as the number of columns in the data.  Number of features: 8 feature names: 61
+#                
 global_explanation = explainer.explain_global(X_test, y_test)
 # If you used the PFIExplainer in the previous step, use the next line of code instead
 # global_explanation = explainer.explain_global(x_train, true_labels=y_train)
