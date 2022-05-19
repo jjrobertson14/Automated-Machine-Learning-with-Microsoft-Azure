@@ -8,6 +8,9 @@ import os
 import pickle
 import sys
 
+import pandas as pd
+import numpy as np
+
 #Importing the Decision Tree from scikit-learn library
 from sklearn.tree import DecisionTreeClassifier
 # Metrics for Evaluation of model Accuracy and F1-score, for classification
@@ -25,7 +28,8 @@ long_options = [
     'resource-group=',
     'datastore-name=',
     'out-model-file-name=',
-    'features='
+    'numeric-feature-names=',
+    'categoric-feature-names='
 ]
 opts, args = getopt.getopt(argv, None, long_options)
 # except:
@@ -46,24 +50,38 @@ for opt, arg in opts:
         p_datastore_name = arg
     elif opt == '--out-model-file-name':
         p_out_model_file_name = arg
-    elif opt == '--features':
-        # take in list of strings argument
-        p_features = arg
-        print('p_features was set with value: ', p_features)
-        print('p_features is now a: ', type(p_features))
+    elif opt == '--numeric-feature-names':
+        # take in string encoding of list of numeric feature names
+        p_numeric_feature_names = arg
         # The arg value is a string that looks like a list: '["col1","col2"]'
         # So,turn string of features into list of features
         # (Remove square brackets and " marks)
-        p_features = p_features.replace("[","")
-        p_features = p_features.replace("]","")
-        p_features = p_features.replace("\"","")
-        print('On character replacement, p_features was set with value: ', p_features)
-        # (Now split on comma)
-        p_features = p_features.split(',')
-        print('On split, p_features was set with value: ', p_features)
-        print('p_features is now, after decoding string into list, a: ', type(p_features))
+        p_numeric_feature_names = p_numeric_feature_names.replace("[","")
+        p_numeric_feature_names = p_numeric_feature_names.replace("]","")
+        p_numeric_feature_names = p_numeric_feature_names.replace("\"","")
+        print('On character replacement, p_numeric_feature_names was set with value: ', p_numeric_feature_names)
+        # (Now split on comma to have a list)
+        p_numeric_feature_names = p_numeric_feature_names.split(',')
+        print('On split, p_numeric_feature_names was set with value: ', p_numeric_feature_names)
+    elif opt == '--categoric-feature-names':
+        # take in string encoding of list of categoric feature names
+        p_categoric_feature_names = arg
+        # The arg value is a string that looks like a list: '["col1","col2"]'
+        # So,turn string of features into list of features
+        # (Remove square brackets and " marks)
+        p_categoric_feature_names = p_categoric_feature_names.replace("[","")
+        p_categoric_feature_names = p_categoric_feature_names.replace("]","")
+        p_categoric_feature_names = p_categoric_feature_names.replace("\"","")
+        print('On character replacement, p_categoric_feature_names was set with value: ', p_categoric_feature_names)
+        # (Now split on comma to have a list)
+        p_categoric_feature_names = p_categoric_feature_names.split(',')
+        print('On split, p_categoric_feature_names was set with value: ', p_categoric_feature_names)
     else:
         print("Unrecognized option passed, continuing run, it is: " + opt)
+
+p_feature_names = [*p_numeric_feature_names, *p_categoric_feature_names]
+print('p_feature_names was set with value: ', p_feature_names)
+print('p_feature_names is now, after decoding numeric and categoric features into lists and concatenating them, a: ', type(p_feature_names))
 
 # BEGIN Get the Workspace object from Azure
 # (you can find tenant id under azure active directory->properties)
@@ -136,25 +154,27 @@ file.close()
 
 # BEGIN Add Explanations (In terms of both engineered and raw features)
 
-# TODO Save engineered feature names to create TabularExplainer with them, perhaps copy this code from Notebook...
+# Save engineered feature names to create TabularExplainer with them, perhaps copy this code from Notebook...
 # Get OneHotEncoded column names in order to Explain in terms of engineered columns
 from sklearn.preprocessing import OneHotEncoder
 one_hot_encoder = classifier_pipeline['preprocessor'].transformers[1][1][1]
-# df_encoded_categorical_column_names = one_hot_encoder.get_feature_names(p_categorical_features)
-# Set 
-# engineeredFeatures=[*p_numeric_features, *p_categorical_features]
+one_hot_encoder.fit(
+    pd.DataFrame(X_test[p_categoric_feature_names], dtype=np.str, columns=p_categoric_feature_names)
+)
+df_encoded_categorical_feature_names = one_hot_encoder.get_feature_names(p_categoric_feature_names)
+# Set list of engineeredFeatureNames
+engineeredFeatureNames=[*p_numeric_feature_names, *df_encoded_categorical_feature_names]
 
 from interpret.ext.blackbox import TabularExplainer
 # classifier_pipeline.steps[-1][1] returns the trained classification model
 # pass transformation as an input to create the explanation object
 # "features" and "classes" fields are optional
 classifier_pipeline.fit(X_train, y_train.values.ravel())
-# TODO send preprocessor inside classifier_pipeline in TabularExplainer construction here
+# Send ColumnTransformer preprocessor inside classifier_pipeline in TabularExplainer construction here
 explainer = TabularExplainer(classifier_pipeline.steps[-1][1],
                                      initialization_examples=X_train,
-                                     features=p_features,
+                                     features=engineeredFeatureNames,
                                      transformations=classifier_pipeline['preprocessor'])
-# TODO make sure you can see both Raw and Engineered features in the Explanation visualization
 
 # Explain results with Explainer and upload the explanation
 
@@ -162,6 +182,7 @@ explainer = TabularExplainer(classifier_pipeline.steps[-1][1],
 
 # You can use the training data or the test data here, but test data would allow you to use Explanation Exploration
 # print("X_test, line value before explainer.explain_global: \n" + str(X_test))
+# TODO fix error here
 global_explanation = explainer.explain_global(X_test, y_test)
 # If you used the PFIExplainer in the previous step, use the next line of code instead
 # global_explanation = explainer.explain_global(x_train, true_labels=y_train)
@@ -179,6 +200,7 @@ print('global_explanation.get_feature_importance_dict(): ', global_explanation.g
 # print("y_test value the line before client.upload_model_explanation(): \n" + str(y_test))
 # print("y_test.values.ravel() value passed as true_ys to client.upload_model_explanation(): \n" + str(y_test.values.ravel()))
 client = ExplanationClient.from_run(run)
+# TODO make sure you can see both Raw and Engineered features in the Explanation visualization
 client.upload_model_explanation(global_explanation, true_ys=y_test.values.ravel(), comment='global explanation: all features, raw and engineered')
 
 # Or you can only upload the explanation object with the top k feature info with this...
@@ -218,7 +240,7 @@ client.upload_model_explanation(global_explanation, true_ys=y_test.values.ravel(
 # # "features" and "classes" fields are optional
 # explainer = TabularExplainer(model_DT, 
 #                              X_train, 
-#                              features=p_features)
+#                              features=p_feature_names)
 
 # # BEGIN Get Global Explanations, global as in 'of total data'...
 
