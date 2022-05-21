@@ -231,7 +231,7 @@ categoric_X_train_preprocessed = classifier_pipeline['preprocessor'].transformer
 # Get and fit OneHotEncoder
 one_hot_encoder = classifier_pipeline['preprocessor'].transformers[1][1][1]
 one_hot_encoder.fit(categoric_X_train_preprocessed)
-# Get new One Hot Encoded column names
+# TODO FIX BUG HERE Get new One Hot Encoded column names
 df_encoded_categorical_column_names = one_hot_encoder.get_feature_names(p_categoric_feature_names)
 print("df_encoded_categorical_column_names", df_encoded_categorical_column_names)
 # Transform categoric, null-imputed features with fitted OneHotEncoder
