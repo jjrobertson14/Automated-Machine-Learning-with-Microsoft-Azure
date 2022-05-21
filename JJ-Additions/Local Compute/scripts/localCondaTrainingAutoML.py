@@ -154,13 +154,17 @@ file.close()
 
 # BEGIN Add Explanations (In terms of both engineered and raw features)
 from interpret.ext.blackbox import TabularExplainer
-
 # BEGIN Add Raw Explanations
-# classifier_pipeline.steps[-1][1] returns the trained classification model
-# pass transformation as an input to create the explanation object
-# "features" and "classes" fields are optional
+
+# Fit the model
 classifier_pipeline.fit(X_train, y_train.values.ravel())
+
 # Send ColumnTransformer preprocessor inside classifier_pipeline in TabularExplainer construction here
+# classifier_pipeline.steps[-1][1] returns the trained classification model
+# Pass transformation as an input to create the Explanation object in terms of Raw Features that are not One Hot Encoded
+# Explain in terms of engineered features
+# NOTE: classifier_pipeline.steps[-1][1] contains the Model
+# NOTE: "features" and "classes" fields are optional for TabularExplainers
 raw_explainer = TabularExplainer(classifier_pipeline.steps[-1][1],
                                      initialization_examples=X_train,
                                      features=p_feature_names,
@@ -169,8 +173,8 @@ raw_explainer = TabularExplainer(classifier_pipeline.steps[-1][1],
 
 # Get Global Explanations of raw features, global as in 'of total data'...
 # You can use the training data or the test data here, but test data would allow you to use Explanation Exploration
-# print("X_test, line value before raw_explainer.explain_global: \n" + str(X_test))
-global_explanation = raw_explainer.explain_global(X_test, y_test)
+# print("X_train, line value before raw_explainer.explain_global: \n" + str(X_train))
+global_explanation = raw_explainer.explain_global(X_train, y_train)
 # If you used the PFIExplainer in the previous step, use the next line of code instead
 # global_explanation = raw_explainer.explain_global(x_train, true_labels=y_train)
 # Sorted feature importance values and feature names
@@ -181,73 +185,97 @@ print('globalFeatureExplanations: ', globalFeatureExplanations)
 # Alternatively, you can print out a dictionary that holds the top K feature names and values
 print('global_explanation.get_feature_importance_dict(): ', global_explanation.get_feature_importance_dict())
 
-# print("y_test value the line before client.upload_model_explanation(): \n" + str(y_test))
-# print("y_test.values.ravel() value passed as true_ys to client.upload_model_explanation(): \n" + str(y_test.values.ravel()))
+# print("y_train value the line before client.upload_model_explanation(): \n" + str(y_train))
+# print("y_train.values.ravel() value passed as true_ys to client.upload_model_explanation(): \n" + str(y_train.values.ravel()))
 client = ExplanationClient.from_run(run)
 #           (perhaps can only have Explanation of one of Raw or Engineered features at once?)
 # Upload global model explanation data...
 # The explanation can then be downloaded on any compute
 # Multiple explanations can be uploaded
 # TODO pass comments arguments as parameters
-client.upload_model_explanation(global_explanation, true_ys=y_test.values.ravel(), comment='global explanation: all features, raw')
+client.upload_model_explanation(global_explanation, true_ys=y_train.values.ravel(), comment='global explanation: train dataset features, raw')
 # Or you can only upload the explanation object with the top k feature info with this...
 # client.upload_model_explanation(global_explanation, top_k=2, comment='global explanation: Only top 2 features')
 # END Add Raw Explanations
 
+
+
+
 # BEGIN Add Engineered Feature Explanations
-# BEGIN Save engineered feature names to create TabularExplainer with them, perhaps copy this code from Notebook...
-# Get OneHotEncoded column names in order to Explain in terms of engineered columns
-from sklearn.preprocessing import OneHotEncoder
+
+# TODO USE BELOW FOR REFERENCE THEN DELETE
+# Pipeline(steps=[('imputer',
+#                                                   SimpleImputer(strategy='median')),
+#                                                  ('scaler', StandardScaler())]),
+#                                  ['Age', 'Fare']),
+#                                 ('cat',
+#                                  Pipeline(steps=[('imputer',
+#                                                   SimpleImputer(fill_value='missing',
+#                                                                 strategy='constant')),
+#                                                  ('onehot',
+#                                                   OneHotEncoder(handle_unknown='ignore',
+#                                                                 sparse=False))]),
+#                                  ['Pclass', 'Sex', 'SibSp', 'Parch', 'Cabin',
+#                                   'Embarked'])])
+# TODO USE ABOVE FOR REFERENCE THEN DELETE
+
+# Split training features into numeric and categoric dataframes
+numeric_X_train = pd.DataFrame(X_train[p_numeric_feature_names], dtype=np.str, columns=p_numeric_feature_names)
+categoric_X_train = pd.DataFrame(X_train[p_categoric_feature_names], dtype=np.str, columns=p_categoric_feature_names)
+# Fit and Run the numeric and categoric ColumnTransformers on the split dataframes to perform feature engineering
+classifier_pipeline['preprocessor'].transformers[0][1].fit(numeric_X_train)
+classifier_pipeline['preprocessor'].transformers[1][1][1].fit(categoric_X_train)
+numeric_X_train_preprocessed = classifier_pipeline['preprocessor'].transformers[0][1].transform(numeric_X_train)
+numeric_X_train_preprocessed = pd.DataFrame(numeric_X_train_preprocessed, dtype=np.float, columns=p_numeric_feature_names)
+categoric_X_train_preprocessed = classifier_pipeline['preprocessor'].transformers[1][1][1].transform(categoric_X_train)
+# Get and fit OneHotEncoder
 one_hot_encoder = classifier_pipeline['preprocessor'].transformers[1][1][1]
-one_hot_encoder.fit(
-    pd.DataFrame(X_test[p_categoric_feature_names], dtype=np.str, columns=p_categoric_feature_names)
-)
-df_encoded_categorical_feature_names = one_hot_encoder.get_feature_names(p_categoric_feature_names)
-# Set list of engineeredFeatureNames
-engineeredFeatureNames=[*p_numeric_feature_names, *df_encoded_categorical_feature_names]
-# END Save engineered feature names to create TabularExplainer with them, perhaps copy this code from Notebook...
-# TODO make sure you can see both Raw and Engineered features in the Explanation visualization
-# TODO uncomment the following non-comments.
-#                   (first, try getting the preprocessed data set to get Engineered Feature Explanations)
-# 
-# engineered_explainer = TabularExplainer(classifier_pipeline,
-                                    #  initialization_examples=X_train,
-                                    #  features=engineeredFeatureNames)
+one_hot_encoder.fit(categoric_X_train_preprocessed)
+# Get new One Hot Encoded column names
+df_encoded_categorical_column_names = one_hot_encoder.get_feature_names(p_categoric_feature_names)
+print("df_encoded_categorical_column_names", df_encoded_categorical_column_names)
+# Transform categoric, null-imputed features with fitted OneHotEncoder
+categoric_X_train_preprocessed = one_hot_encoder.transform(categoric_X_train_preprocessed)
+# Turn preprocessed categoric features into a DataFrame
+categoric_X_train_preprocessed = pd.DataFrame(categoric_X_train_preprocessed, dtype=np.float64, columns=df_encoded_categorical_column_names)
+
+# Combine the numeric DF with the categorical DF to submit to the classifier_pipeline
+X_train_preprocessed_list = [numeric_X_train_preprocessed, categoric_X_train_preprocessed]
+X_train_preprocessed = pd.concat(X_train_preprocessed_list, axis=1)
+
+
+# Save engineered features' names to create TabularExplainer with them
+engineeredFeatures=[*p_numeric_feature_names, *df_encoded_categorical_column_names]
+
+# Fit the model
+classifier_pipeline.steps[-1][1].fit(X_train_preprocessed, y_train)
+# Explain in terms of engineered features
+# NOTE: classifier_pipeline.steps[-1][1] contains the Model
+# NOTE: "features" and "classes" fields are optional for TabularExplainers
+from interpret.ext.blackbox import TabularExplainer
+engineered_explainer = TabularExplainer(classifier_pipeline.steps[-1][1],
+                                     initialization_examples=X_train_preprocessed,
+                                     features=engineeredFeatures)
 # Explain results with this Explainer and upload the Explanation...
 
 # Get Global Explanations of raw features, global as in 'of total data'...
 # You can use the training data or the test data here, but test data would allow you to use Explanation Exploration
-# print("X_test, line value before engineered_explainer.explain_global: \n" + str(X_test))
-# global_explanation = engineered_explainer.explain_global(X_test, y_test)
+# print("X_train, line value before engineered_explainer.explain_global: \n" + str(X_train))
+global_explanation = engineered_explainer.explain_global(X_train_preprocessed, y_train)
 # If you used the PFIExplainer in the previous step, use the next line of code instead
-# global_explanation = engineered_explainer.explain_global(x_train, true_labels=y_train)
+# global_explanation = engineered_explainer.explain_global(X_train, true_labels=y_train)
 # Sorted feature importance values and feature names
-# sorted_global_importance_values = global_explanation.get_ranked_global_values()
-# sorted_global_importance_names = global_explanation.get_ranked_global_names()
-# globalFeatureExplanations = dict(zip(sorted_global_importance_names, sorted_global_importance_values))
-# print('globalFeatureExplanations: ', globalFeatureExplanations)
+sorted_global_importance_values = global_explanation.get_ranked_global_values()
+sorted_global_importance_names = global_explanation.get_ranked_global_names()
+globalFeatureExplanations = dict(zip(sorted_global_importance_names, sorted_global_importance_values))
+print('globalFeatureExplanations: ', globalFeatureExplanations)
 # Alternatively, you can print out a dictionary that holds the top K feature names and values
-# print('global_explanation.get_feature_importance_dict(): ', global_explanation.get_feature_importance_dict())
-# client.upload_model_explanation(global_explanation, true_ys=y_test.values.ravel(), comment='global explanation: all features, engineered')
-# END Add Engineered Feature Explanations
+print('global_explanation.get_feature_importance_dict(): ', global_explanation.get_feature_importance_dict())
 
-
-
-# BEGIN Get local explanations of individual predictions
-# Get explanation for the first few data points in the test set
-# local_explanation = engineered_explainer.explain_local(X_test[0:5])
-# Sorted feature importance values and feature names
-# sorted_local_importance_names = local_explanation.get_ranked_local_names()
-# print('sorted_local_importance_names: ', sorted_local_importance_names)
-# print('len(sorted_local_importance_names): ', len(sorted_local_importance_names))
-# sorted_local_importance_values = local_explanation.get_ranked_local_values()
-# print('sorted_local_importance_values: ', sorted_local_importance_values)
-# print('len(sorted_local_importance_values): ', len(sorted_local_importance_values)) 
-# 
-# THIS DOES NOT WORK LIKE IT DOES WITH THE GLOBAL_EXPLANATION, HOWEVER!
-# client.upload_model_explanation(sorted_local_importance_values, comment='local explanation for data points 0-5: all features')
-#
-# END Get local explanations of individual predictions
+# Upload the explanation in terms of engineered features
+from azureml.interpret import ExplanationClient
+client = ExplanationClient.from_run(run)
+client.upload_model_explanation(global_explanation, true_ys=y_train.values.ravel(), comment='global explanation: train dataset features, engineered')
 
 
 
