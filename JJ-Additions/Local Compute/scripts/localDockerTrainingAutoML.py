@@ -161,9 +161,14 @@ model_DT = classifier_pipeline.fit(X_train,y_train)
 # We use the predict() on the model to predict the output
 prediction = model_DT.predict(X_test)
 
-# For classification, using accuracy and F1 score
-print(accuracy_score(y_test,prediction))
-print(f1_score(y_test,prediction))
+# TODO copy to localCondaTraininggAutoML.py if this works fine...
+# Log classification metrics to evaluate the model with, using accuracy and F1 score for Classification here
+accuracy = accuracy_score(y_test,prediction)
+f1 = f1_score()
+print("accuracy: ", accuracy)
+print("f1: ", f1)
+run.log('accuracy', accuracy)
+run.log('f1', f1)
 
 # for regression...
 #
