@@ -29,7 +29,8 @@ long_options = [
     'datastore-name=',
     'out-model-file-name=',
     'numeric-feature-names=',
-    'categoric-feature-names='
+    'categoric-feature-names=',
+    'x-train-test-y-train-test='
 ]
 opts, args = getopt.getopt(argv, None, long_options)
 # except:
@@ -51,7 +52,7 @@ for opt, arg in opts:
     elif opt == '--out-model-file-name':
         p_out_model_file_name = arg
     elif opt == '--numeric-feature-names':
-        # take in string encoding of list of numeric feature names
+        # Take in string encoding of list of numeric feature names, turn back into a list
         p_numeric_feature_names = arg
         # The arg value is a string that looks like a list: '["col1","col2"]'
         # So,turn string of features into list of features
@@ -64,7 +65,7 @@ for opt, arg in opts:
         p_numeric_feature_names = p_numeric_feature_names.split(',')
         print('On split, p_numeric_feature_names was set with value: ', p_numeric_feature_names)
     elif opt == '--categoric-feature-names':
-        # take in string encoding of list of categoric feature names
+        # Take in string encoding of list of categoric feature names, turn back into a list
         p_categoric_feature_names = arg
         # The arg value is a string that looks like a list: '["col1","col2"]'
         # So,turn string of features into list of features
@@ -76,6 +77,23 @@ for opt, arg in opts:
         # (Now split on comma to have a list)
         p_categoric_feature_names = p_categoric_feature_names.split(',')
         print('On split, p_categoric_feature_names was set with value: ', p_categoric_feature_names)
+    elif opt == '--x-train-test-y-train-test':
+        # Take in string encoding of list of categoric feature names, turn back into a list
+        xTrainTestYTrainTest = arg
+        # The arg value is a string that looks like a list: '["datasetName1","datasetName2"]'
+        # So,turn string of features into list of features
+        # (Remove square brackets and " marks)
+        xTrainTestYTrainTest = xTrainTestYTrainTest.replace("[","")
+        xTrainTestYTrainTest = xTrainTestYTrainTest.replace("]","")
+        xTrainTestYTrainTest = xTrainTestYTrainTest.replace("\"","")
+        print('On character replacement, xTrainTestYTrainTest was set with value: ', xTrainTestYTrainTest)
+        # (Now split on comma to have a list)
+        xTrainTestYTrainTest = xTrainTestYTrainTest.split(',')
+        print('On split, xTrainTestYTrainTest was set with value: ', xTrainTestYTrainTest)
+        X_train_registered_name = xTrainTestYTrainTest[0]
+        X_test_registered_name = xTrainTestYTrainTest[1]
+        y_train_registered_name = xTrainTestYTrainTest[2]
+        y_test_registered_name = xTrainTestYTrainTest[3]
     else:
         print("Unrecognized option passed, continuing run, it is: " + opt)
 
@@ -109,10 +127,10 @@ datastore = Datastore.get(ws, p_datastore_name)
 # Get DataSet for training from the datastore of the Workspace
 # (having registered them already in Notebook code)
 # (later) TODO?: remove hardcoding the names of the datasets to get and allow passing them as a --argument 
-X_train = Dataset.get_by_name(ws, "Titanic Feature Column Data for training (LocalConda notebook)", version = 'latest').to_pandas_dataframe()
-X_test  = Dataset.get_by_name(ws, "Titanic Feature Column Data for testing (LocalConda notebook)", version = 'latest').to_pandas_dataframe()
-y_train = Dataset.get_by_name(ws, "Titanic Target Column Data for training (LocalConda notebook)", version = 'latest').to_pandas_dataframe()
-y_test = Dataset.get_by_name(ws, "Titanic Target Column Data for testing (LocalConda notebook)", version = 'latest').to_pandas_dataframe()
+X_train = Dataset.get_by_name(ws, X_train_registered_name, version = 'latest').to_pandas_dataframe()
+X_test  = Dataset.get_by_name(ws, X_test_registered_name, version = 'latest').to_pandas_dataframe()
+y_train = Dataset.get_by_name(ws, y_train_registered_name, version = 'latest').to_pandas_dataframe()
+y_test = Dataset.get_by_name(ws, y_test_registered_name, version = 'latest').to_pandas_dataframe()
 data = {"train": {"X": X_train, "y": y_train},
         "test": {"X": X_test, "y": y_test}}
 
@@ -120,6 +138,21 @@ data = {"train": {"X": X_train, "y": y_train},
 with open('resources/classifier_pipeline.pickle', 'rb') as file:
     classifier_pipeline = pickle.load(file)
     print(classifier_pipeline)
+
+# You should have a pipeline that looks similar to this one
+# Pipeline(steps=[('imputer',
+#                                                   SimpleImputer(strategy='median')),
+#                                                  ('scaler', StandardScaler())]),
+#                                  ['Age', 'Fare']),
+#                                 ('cat',
+#                                  Pipeline(steps=[('imputer',
+#                                                   SimpleImputer(fill_value='missing',
+#                                                                 strategy='constant')),
+#                                                  ('onehot',
+#                                                   OneHotEncoder(handle_unknown='ignore',
+#                                                                 sparse=False))]),
+#                                  ['Pclass', 'Sex', 'SibSp', 'Parch', 'Cabin',
+#                                   'Embarked'])])
 
 # Run training Pipeline
 model_DT = classifier_pipeline.fit(X_train,y_train)
@@ -192,7 +225,7 @@ client = ExplanationClient.from_run(run)
 # Upload global model explanation data...
 # The explanation can then be downloaded on any compute
 # Multiple explanations can be uploaded
-# TODO pass comments arguments as parameters
+# TODO? pass comments arguments as parameters
 client.upload_model_explanation(global_explanation, true_ys=y_train.values.ravel(), comment='global explanation: train dataset features, raw')
 # Or you can only upload the explanation object with the top k feature info with this...
 # client.upload_model_explanation(global_explanation, top_k=2, comment='global explanation: Only top 2 features')
@@ -202,22 +235,6 @@ client.upload_model_explanation(global_explanation, true_ys=y_train.values.ravel
 
 
 # BEGIN Add Engineered Feature Explanations
-
-# TODO USE BELOW FOR REFERENCE THEN DELETE
-# Pipeline(steps=[('imputer',
-#                                                   SimpleImputer(strategy='median')),
-#                                                  ('scaler', StandardScaler())]),
-#                                  ['Age', 'Fare']),
-#                                 ('cat',
-#                                  Pipeline(steps=[('imputer',
-#                                                   SimpleImputer(fill_value='missing',
-#                                                                 strategy='constant')),
-#                                                  ('onehot',
-#                                                   OneHotEncoder(handle_unknown='ignore',
-#                                                                 sparse=False))]),
-#                                  ['Pclass', 'Sex', 'SibSp', 'Parch', 'Cabin',
-#                                   'Embarked'])])
-# TODO USE ABOVE FOR REFERENCE THEN DELETE
 
 # Split training features into numeric and categoric dataframes
 numeric_X_train = pd.DataFrame(X_train[p_numeric_feature_names], dtype=np.str, columns=p_numeric_feature_names)
@@ -232,7 +249,7 @@ categoric_X_train_preprocessed = classifier_pipeline['preprocessor'].transformer
 # Get and fit OneHotEncoder
 one_hot_encoder = classifier_pipeline['preprocessor'].transformers[1][1][1]
 one_hot_encoder.fit(categoric_X_train_preprocessed)
-# TODO FIX BUG HERE Get new One Hot Encoded column names
+# Get new One Hot Encoded column names
 df_encoded_categorical_column_names = one_hot_encoder.get_feature_names(p_categoric_feature_names)
 print("df_encoded_categorical_column_names", df_encoded_categorical_column_names)
 # Transform categoric, null-imputed features with fitted OneHotEncoder
@@ -288,7 +305,7 @@ client.upload_model_explanation(global_explanation, true_ys=y_train.values.ravel
 
 
 
-# BEGIN Old code that was used to get Explanations of Model, when not using a sklearn pipeline to transform features...
+# BEGIN Alternative code that was used to get Explanations of Model, it is more simple, not using a sklearn Pipeline to transform features...
 # from interpret.ext.blackbox import TabularExplainer
 
 # # "features" and "classes" fields are optional
