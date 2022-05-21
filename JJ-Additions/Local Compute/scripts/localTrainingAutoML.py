@@ -90,7 +90,7 @@ datastore = Datastore.get(ws, p_datastore_name)
 
 # Get DataSet for training from the datastore of the Workspace
 # (having registered them already in Notebook code)
-# (later) TODO: remove hardcoding the names of the datasets to get and allow passing them as a --argument 
+# (later) TODO?: remove hardcoding the names of the datasets to get and allow passing them as a --argument 
 X_train = Dataset.get_by_name(ws, "Titanic Feature Column Data for training", version = 'latest').to_pandas_dataframe()
 X_test  = Dataset.get_by_name(ws, "Titanic Feature Column Data for testing", version = 'latest').to_pandas_dataframe()
 y_train = Dataset.get_by_name(ws, "Titanic Target Column Data for training", version = 'latest').to_pandas_dataframe()
@@ -175,4 +175,4 @@ print('sorted_local_importance_values: ', sorted_local_importance_values)
 
 exit(0)
 
-# TODO get to appear in visualization's Model Performance tab: the accuracy, precision, f1 scores, false positive rates, false negative rates
+# TODO? get to appear in visualization's Model Performance tab: the accuracy, precision, f1 scores, false positive rates, false negative rates
