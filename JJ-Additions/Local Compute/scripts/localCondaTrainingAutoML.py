@@ -222,12 +222,13 @@ client.upload_model_explanation(global_explanation, true_ys=y_train.values.ravel
 # Split training features into numeric and categoric dataframes
 numeric_X_train = pd.DataFrame(X_train[p_numeric_feature_names], dtype=np.str, columns=p_numeric_feature_names)
 categoric_X_train = pd.DataFrame(X_train[p_categoric_feature_names], dtype=np.str, columns=p_categoric_feature_names)
-# Fit and Run the numeric and categoric ColumnTransformers on the split dataframes to perform feature engineering
+# Fit and Run the numeric ColumnTransformers on the split dataframe to perform feature engineering
 classifier_pipeline['preprocessor'].transformers[0][1].fit(numeric_X_train)
-classifier_pipeline['preprocessor'].transformers[1][1][1].fit(categoric_X_train)
 numeric_X_train_preprocessed = classifier_pipeline['preprocessor'].transformers[0][1].transform(numeric_X_train)
 numeric_X_train_preprocessed = pd.DataFrame(numeric_X_train_preprocessed, dtype=np.float, columns=p_numeric_feature_names)
-categoric_X_train_preprocessed = classifier_pipeline['preprocessor'].transformers[1][1][1].transform(categoric_X_train)
+# Fit and Run the categoric ColumnTransformers on the split dataframe to perform feature engineering
+classifier_pipeline['preprocessor'].transformers[1][1].steps[0][1].fit(categoric_X_train)
+categoric_X_train_preprocessed = classifier_pipeline['preprocessor'].transformers[1][1].steps[0][1].transform(categoric_X_train)
 # Get and fit OneHotEncoder
 one_hot_encoder = classifier_pipeline['preprocessor'].transformers[1][1][1]
 one_hot_encoder.fit(categoric_X_train_preprocessed)
