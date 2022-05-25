@@ -103,14 +103,18 @@ print('p_feature_names is now, after decoding numeric and categoric features int
 
 # BEGIN Get the Workspace object from Azure
 # (you can find tenant id under azure active directory->properties)
-# ia = InteractiveLoginAuthentication(tenant_id=[p_tenant_id])
+# Perform workaround for interactive authentication ocurring
+print("About to call 'ia = InteractiveLoginAuthentication(tenant_id=p_tenant_id)'")
+# from azureml.core.authentication import InteractiveLoginAuthentication
+# ia = InteractiveLoginAuthentication(tenant_id=p_tenant_id)
+# Get WS object with authentication
 ws_name = p_ws_name
 subscription_id = p_subscription_id
 resource_group = p_resource_group
 ws = Workspace.get(name=ws_name,
                    subscription_id=subscription_id,
                    resource_group=resource_group)
-#    auth=ia)
+                #    auth=ia)
 print('ws.name:', ws.name, 'ws.resource_group:', ws.resource_group, 'ws.location:', ws.location, 'ws.subscription_id:', ws.subscription_id, sep='\n')
 
 # Set up for Run that is to be linked with the Experiment this script is run with
