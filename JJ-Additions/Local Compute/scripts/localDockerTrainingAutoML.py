@@ -102,20 +102,34 @@ print('p_feature_names was set with value: ', p_feature_names)
 print('p_feature_names is now, after decoding numeric and categoric features into lists and concatenating them, a: ', type(p_feature_names))
 
 # BEGIN Get the Workspace object from Azure
-# (you can find tenant id under azure active directory->properties)
-# Perform workaround for interactive authentication ocurring
-print("About to call 'ia = InteractiveLoginAuthentication(tenant_id=p_tenant_id)'")
+
+# This will not work inside the headless docker container this runs in...
 # from azureml.core.authentication import InteractiveLoginAuthentication
 # ia = InteractiveLoginAuthentication(tenant_id=p_tenant_id)
-# Get WS object with authentication
+
+# Get WS object with Service Principal authentication
 ws_name = p_ws_name
 subscription_id = p_subscription_id
 resource_group = p_resource_group
+# Performing workaround for interactive authentication ocurring
+# Authenticate with the Service Principal in order to get the Workspace object
+# (you can find tenant id under azure active directory->properties)
+# (you can find clientId in the Service Principal's page in the Azure portal)
+# (you can find clientSecret in the Service Principal's page in the Azure portal)
+from azureml.core.authentication import ServicePrincipalAuthentication
+sp = ServicePrincipalAuthentication(tenant_id=p_tenant_id,
+                                    service_principal_id=kv.get_secret(name="localDockerAmlPrincipalId"), # clientId of service principal
+                                    service_principal_password=kv.get_secret(name="localDockerAmlPrincipalPass")) # clientSecret of service principal
 ws = Workspace.get(name=ws_name,
                    subscription_id=subscription_id,
-                   resource_group=resource_group)
-                #    auth=ia)
-print('ws.name:', ws.name, 'ws.resource_group:', ws.resource_group, 'ws.location:', ws.location, 'ws.subscription_id:', ws.subscription_id, sep='\n')
+                   resource_group=resource_group,
+                   auth=sp)
+print("After re-authenticating to the workspace with Service Principal", 
+        "ws.name: " + ws.name, 
+        "ws.resource_group: " + ws.resource_group, 
+        "ws.location: " + ws.location, 
+        "ws.subscription_id: " + ws.subscription_id, 
+sep='\n')
 
 # Set up for Run that is to be linked with the Experiment this script is run with
 run = Run.get_context()
