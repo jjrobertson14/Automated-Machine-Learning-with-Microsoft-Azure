@@ -5,4 +5,5 @@ simple_python_to_json/__pycache__/*
 *.pickle
 explanation/*
 .env
+custom_env_vars_for_script_inside_docker_container
 environment_out/*

@@ -19,9 +19,10 @@ from sklearn.metrics  import f1_score,accuracy_score
 # TODO BEGIN remove
 import subprocess
 print("output of pwd: ", subprocess.check_output("pwd", shell=True).decode('ascii'))
-print("output of ls -altr .: ", subprocess.check_output("ls -altr .env", shell=True))
-print("output of ls -altr .env: ", subprocess.check_output("ls -altr .env", shell=True))
-print("output of cat .env: ", subprocess.check_output("cat .env", shell=True))
+print("output of ls -altr .: ", subprocess.check_output("ls -altr", shell=True).decode('ascii'))
+print("output of ls -altr ./resources: ", subprocess.check_output("ls -altr ./resources", shell=True).decode('ascii'))
+print("output of ls -altr ./resources/custom_env_vars_for_script_inside_docker_container: ", subprocess.check_output("ls -altr ./resources/custom_env_vars_for_script_inside_docker_container", shell=True).decode('ascii'))
+print("output of cat ./resources/custom_env_vars_for_script_inside_docker_container: ", subprocess.check_output("cat ./resources/custom_env_vars_for_script_inside_docker_container", shell=True).decode('ascii'))
 # TODO END remove
 
 # Get Arguments
