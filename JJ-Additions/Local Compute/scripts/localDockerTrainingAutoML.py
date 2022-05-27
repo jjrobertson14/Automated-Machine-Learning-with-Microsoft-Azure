@@ -16,14 +16,11 @@ from sklearn.tree import DecisionTreeClassifier
 # Metrics for Evaluation of model Accuracy and F1-score, for classification
 from sklearn.metrics  import f1_score,accuracy_score
 
-# TODO BEGIN remove
+# Print info about the local environment
 import subprocess
 print("output of pwd: ", subprocess.check_output("pwd", shell=True).decode('ascii'))
 print("output of ls -altr .: ", subprocess.check_output("ls -altr", shell=True).decode('ascii'))
 print("output of ls -altr ./resources: ", subprocess.check_output("ls -altr ./resources", shell=True).decode('ascii'))
-print("output of ls -altr ./resources/custom_env_vars_for_script_inside_docker_container: ", subprocess.check_output("ls -altr ./resources/custom_env_vars_for_script_inside_docker_container", shell=True).decode('ascii'))
-print("output of cat ./resources/custom_env_vars_for_script_inside_docker_container: ", subprocess.check_output("cat ./resources/custom_env_vars_for_script_inside_docker_container", shell=True).decode('ascii'))
-# TODO END remove
 
 # Get Arguments
 print("sus/argv: ", sys.argv)
@@ -120,15 +117,18 @@ print('p_feature_names is now, after decoding numeric and categoric features int
 ws_name = p_ws_name
 subscription_id = p_subscription_id
 resource_group = p_resource_group
-# Performing workaround for interactive authentication ocurring
+# Get credentials for authentication 
+from dotenv import load_dotenv
+load_dotenv('./resources/custom_env_vars_for_script_inside_docker_container')
 # Authenticate with the Service Principal in order to get the Workspace object
-# (you can find tenant id under azure active directory->properties)
-# (you can find clientId in the Service Principal's page in the Azure portal)
-# (you can find clientSecret in the Service Principal's page in the Azure portal)
+#   (this is a workaround for interactive authentication ocurring within headless Docker container)
+#   (you can find tenant id under azure active directory->properties)
+#   (you can find clientId in the Service Principal's page in the Azure portal)
+#   (you can find clientSecret in the Service Principal's page in the Azure portal)
 from azureml.core.authentication import ServicePrincipalAuthentication
 sp = ServicePrincipalAuthentication(tenant_id=p_tenant_id,
-                                    service_principal_id=kv.get_secret(name="localDockerAmlPrincipalId"), # clientId of service principal
-                                    service_principal_password=kv.get_secret(name="localDockerAmlPrincipalPass")) # clientSecret of service principal
+                                    service_principal_id=os.environ["AML_PRINCIPAL_ID"], # clientId of service principal
+                                    service_principal_password=os.environ["AML_PRINCIPAL_PASS"]) # clientSecret of service principal
 ws = Workspace.get(name=ws_name,
                    subscription_id=subscription_id,
                    resource_group=resource_group,
