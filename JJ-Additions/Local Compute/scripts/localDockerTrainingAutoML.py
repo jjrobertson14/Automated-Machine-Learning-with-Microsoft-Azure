@@ -16,6 +16,14 @@ from sklearn.tree import DecisionTreeClassifier
 # Metrics for Evaluation of model Accuracy and F1-score, for classification
 from sklearn.metrics  import f1_score,accuracy_score
 
+# TODO BEGIN remove
+import subprocess
+print("output of pwd: ", subprocess.check_output("pwd", shell=True).decode('ascii'))
+print("output of ls -altr .: ", subprocess.check_output("ls -altr .env", shell=True))
+print("output of ls -altr .env: ", subprocess.check_output("ls -altr .env", shell=True))
+print("output of cat .env: ", subprocess.check_output("cat .env", shell=True))
+# TODO END remove
+
 # Get Arguments
 print("sus/argv: ", sys.argv)
 argv = sys.argv[1:]
