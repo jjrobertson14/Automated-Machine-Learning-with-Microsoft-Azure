@@ -188,7 +188,6 @@ model_DT = classifier_pipeline.fit(X_train,y_train)
 # We use the predict() on the model to predict the output
 prediction = model_DT.predict(X_test)
 
-# TODO copy to localCondaTraininggAutoML.py ...
 # Log classification metrics to evaluate the model with, using accuracy and F1 score for Classification here
 accuracy = accuracy_score(y_test, prediction)
 f1 = f1_score(y_test, prediction)
@@ -218,7 +217,6 @@ file.close()
 
 
 # BEGIN Add Explanations (In terms of both engineered and raw features)
-# TODO ?shouldn't I use X_test and Y_test for explanations?
 from interpret.ext.blackbox import TabularExplainer
 # BEGIN Add Raw Explanations
 
