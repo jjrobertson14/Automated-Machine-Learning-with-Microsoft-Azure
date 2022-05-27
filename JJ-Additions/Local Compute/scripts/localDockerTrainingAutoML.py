@@ -259,7 +259,7 @@ client = ExplanationClient.from_run(run)
 # The explanation can then be downloaded on any compute
 # Multiple explanations can be uploaded
 # TODO? pass comments arguments as parameters
-client.upload_model_explanation(global_explanation, true_ys=y_test.values.ravel(), comment='global explanation: train dataset features, raw')
+client.upload_model_explanation(global_explanation, true_ys=y_test.values.ravel(), comment='global explanation: test dataset features, raw')
 # Or you can only upload the explanation object with the top k feature info with this...
 # client.upload_model_explanation(global_explanation, top_k=2, comment='global explanation: Only top 2 features')
 # END Add Raw Explanations
@@ -326,7 +326,7 @@ print('global_explanation.get_feature_importance_dict(): ', global_explanation.g
 # Upload the explanation in terms of engineered features
 from azureml.interpret import ExplanationClient
 client = ExplanationClient.from_run(run)
-client.upload_model_explanation(global_explanation, true_ys=y_test.values.ravel(), comment='global explanation: train dataset features, engineered')
+client.upload_model_explanation(global_explanation, true_ys=y_test.values.ravel(), comment='global explanation: test dataset features, engineered')
 
 
 
