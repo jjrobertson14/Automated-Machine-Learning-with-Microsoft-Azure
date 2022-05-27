@@ -190,9 +190,9 @@ prediction = model_DT.predict(X_test)
 
 # TODO copy to localCondaTraininggAutoML.py if this works fine...
 # Log classification metrics to evaluate the model with, using accuracy and F1 score for Classification here
-accuracy = accuracy_score(y_test,prediction)
+accuracy = accuracy_score(y_test, prediction)
 # ! TODO FIX ERROR TypeError: f1_score() missing 2 required positional arguments: 'y_true' and 'y_pred'
-f1 = f1_score()
+f1 = f1_score(y_test, prediction)
 print("accuracy: ", accuracy)
 print("f1: ", f1)
 run.log('accuracy', accuracy)
