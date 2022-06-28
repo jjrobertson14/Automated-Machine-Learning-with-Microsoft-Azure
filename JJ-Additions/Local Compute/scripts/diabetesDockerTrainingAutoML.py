@@ -12,9 +12,9 @@ import pandas as pd
 import numpy as np
 
 #Importing the Decision Tree from scikit-learn library
-from sklearn.tree import DecisionTreeClassifier
-# Metrics for Evaluation of model Accuracy and F1-score, for classification
-from sklearn.metrics  import f1_score,accuracy_score
+from sklearn.tree import DecisionTreeRegressor
+# Metrics for Evaluation of model: RSME and R2 for regression
+from sklearn.metrics  import mean_squared_error,r2_score
 
 # Print info about the local environment
 import subprocess
@@ -162,48 +162,33 @@ data = {"train": {"X": X_train, "y": y_train},
         "test": {"X": X_test, "y": y_test}}
 
 # Unpickle the SciKit Pipline (that performs Transformation and Model Training)
-with open('resources/classifier_pipeline.pickle', 'rb') as file:
-    classifier_pipeline = pickle.load(file)
-    print(classifier_pipeline)
-
-# You should have a pipeline that looks similar to this one
-# Pipeline(steps=[('imputer',
-#                                                   SimpleImputer(strategy='median')),
-#                                                  ('scaler', StandardScaler())]),
-#                                  ['Age', 'Fare']),
-#                                 ('cat',
-#                                  Pipeline(steps=[('imputer',
-#                                                   SimpleImputer(fill_value='missing',
-#                                                                 strategy='constant')),
-#                                                  ('onehot',
-#                                                   OneHotEncoder(handle_unknown='ignore',
-#                                                                 sparse=False))]),
-#                                  ['Pclass', 'Sex', 'SibSp', 'Parch', 'Cabin',
-#                                   'Embarked'])])
+with open('resources/regressor_pipeline.pickle', 'rb') as file:
+    regressor_pipeline = pickle.load(file)
+    print(regressor_pipeline)
 
 # Run training Pipeline
-model_DT = classifier_pipeline.fit(X_train,y_train)
+model_DT = regressor_pipeline.fit(X_train,y_train)
 
 # Training the model is as simple as this
 # We use the predict() on the model to predict the output
 prediction = model_DT.predict(X_test)
 
-# Log classification metrics to evaluate the model with, using accuracy and F1 score for Classification here
-accuracy = accuracy_score(y_test, prediction)
-f1 = f1_score(y_test, prediction)
-print("accuracy: ", accuracy)
-print("f1: ", f1)
-run.log('accuracy', accuracy)
-run.log('f1', f1)
+# Log regression metrics to evaluate the model with, using R2 score and RSME score for Regression here
+r2 = r2_score(y_test, prediction)
+rsme = mean_squared_error(y_test, prediction)
+print("r2: ", r2)
+print("rsme: ", rsme)
+run.log('r2', r2)
+run.log('rsme', rsme)
 
 # for regression...
 #
-# we use R2 score and MAE(mean absolute error)
+# we use R2 score and RSME(root mean squared error)
 # all other steps will be same as classification as shown above
 # 
-# from sklearn.metrics import mean_absolute_error
+# from sklearn.metrics import mean_squared_error
 # from sklearn.metrics import r2_score
-# print(mean_absolute_error(y_test,prediction))
+# print(mean_squared_error(y_test,prediction))
 # print(r2_score(y_test,prediction))
 
 
@@ -221,18 +206,18 @@ from interpret.ext.blackbox import TabularExplainer
 # BEGIN Add Raw Explanations
 
 # Fit the model
-classifier_pipeline.fit(X_test, y_test.values.ravel())
+regressor_pipeline.fit(X_test, y_test.values.ravel())
 
-# Send ColumnTransformer preprocessor inside classifier_pipeline in TabularExplainer construction here
-# classifier_pipeline.steps[-1][1] returns the trained classification model
+# Send ColumnTransformer preprocessor inside regressor_pipeline in TabularExplainer construction here
+# regressor_pipeline.steps[-1][1] returns the trained regression model
 # Pass transformation as an input to create the Explanation object in terms of Raw Features that are not One Hot Encoded
 # Explain in terms of engineered features
-# NOTE: classifier_pipeline.steps[-1][1] contains the Model
-# NOTE: "features" and "classes" fields are optional for TabularExplainers
-raw_explainer = TabularExplainer(classifier_pipeline.steps[-1][1],
+# NOTE: regressor_pipeline.steps[-1][1] contains the Model
+# NOTE: "features" field is optional for TabularExplainers
+raw_explainer = TabularExplainer(regressor_pipeline.steps[-1][1],
                                      initialization_examples=X_test,
                                      features=p_feature_names,
-                                     transformations=classifier_pipeline['preprocessor'])
+                                     transformations=regressor_pipeline['preprocessor'])
 # Explain results with this Explainer and upload the Explanation...
 
 # Get Global Explanations of raw features, global as in 'of total data'...
@@ -271,14 +256,14 @@ client.upload_model_explanation(global_explanation, true_ys=y_test.values.ravel(
 numeric_X_test = pd.DataFrame(X_test[p_numeric_feature_names], dtype=np.str, columns=p_numeric_feature_names)
 categoric_X_test = pd.DataFrame(X_test[p_categoric_feature_names], dtype=np.str, columns=p_categoric_feature_names)
 # Fit and Run the numeric ColumnTransformers on the split dataframe to perform feature engineering
-classifier_pipeline['preprocessor'].transformers[0][1].fit(numeric_X_test)
-numeric_X_test_preprocessed = classifier_pipeline['preprocessor'].transformers[0][1].transform(numeric_X_test)
+regressor_pipeline['preprocessor'].transformers[0][1].fit(numeric_X_test)
+numeric_X_test_preprocessed = regressor_pipeline['preprocessor'].transformers[0][1].transform(numeric_X_test)
 numeric_X_test_preprocessed = pd.DataFrame(numeric_X_test_preprocessed, dtype=np.float, columns=p_numeric_feature_names)
 # Fit and Run the categoric ColumnTransformers on the split dataframe to perform feature engineering
-classifier_pipeline['preprocessor'].transformers[1][1].steps[0][1].fit(categoric_X_test)
-categoric_X_test_preprocessed = classifier_pipeline['preprocessor'].transformers[1][1].steps[0][1].transform(categoric_X_test)
+regressor_pipeline['preprocessor'].transformers[1][1].steps[0][1].fit(categoric_X_test)
+categoric_X_test_preprocessed = regressor_pipeline['preprocessor'].transformers[1][1].steps[0][1].transform(categoric_X_test)
 # Get and fit OneHotEncoder
-one_hot_encoder = classifier_pipeline['preprocessor'].transformers[1][1][1]
+one_hot_encoder = regressor_pipeline['preprocessor'].transformers[1][1][1]
 one_hot_encoder.fit(categoric_X_test_preprocessed)
 # Get new One Hot Encoded column names
 df_encoded_categorical_column_names = one_hot_encoder.get_feature_names(p_categoric_feature_names)
@@ -288,7 +273,7 @@ categoric_X_test_preprocessed = one_hot_encoder.transform(categoric_X_test_prepr
 # Turn preprocessed categoric features into a DataFrame
 categoric_X_test_preprocessed = pd.DataFrame(categoric_X_test_preprocessed, dtype=np.float64, columns=df_encoded_categorical_column_names)
 
-# Combine the numeric DF with the categorical DF to submit to the classifier_pipeline
+# Combine the numeric DF with the categorical DF to submit to the regressor_pipeline
 X_test_preprocessed_list = [numeric_X_test_preprocessed, categoric_X_test_preprocessed]
 X_test_preprocessed = pd.concat(X_test_preprocessed_list, axis=1)
 
@@ -297,12 +282,12 @@ X_test_preprocessed = pd.concat(X_test_preprocessed_list, axis=1)
 engineeredFeatures=[*p_numeric_feature_names, *df_encoded_categorical_column_names]
 
 # Fit the model
-classifier_pipeline.steps[-1][1].fit(X_test_preprocessed, y_test)
+regressor_pipeline.steps[-1][1].fit(X_test_preprocessed, y_test)
 # Explain in terms of engineered features
-# NOTE: classifier_pipeline.steps[-1][1] contains the Model
-# NOTE: "features" and "classes" fields are optional for TabularExplainers
+# NOTE: regressor_pipeline.steps[-1][1] contains the Model
+# NOTE: "features" field is optional for TabularExplainers
 from interpret.ext.blackbox import TabularExplainer
-engineered_explainer = TabularExplainer(classifier_pipeline.steps[-1][1],
+engineered_explainer = TabularExplainer(regressor_pipeline.steps[-1][1],
                                      initialization_examples=X_test_preprocessed,
                                      features=engineeredFeatures)
 # Explain results with this Explainer and upload the Explanation...
@@ -339,7 +324,7 @@ client.upload_model_explanation(global_explanation, true_ys=y_test.values.ravel(
 # BEGIN Alternative code that was used to get Explanations of Model, it is more simple, not using a sklearn Pipeline to transform features...
 # from interpret.ext.blackbox import TabularExplainer
 
-# # "features" and "classes" fields are optional
+# # "features" field is optional
 # explainer = TabularExplainer(model_DT, 
 #                              X_test, 
 #                              features=p_feature_names)
