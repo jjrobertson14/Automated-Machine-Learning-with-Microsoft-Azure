@@ -201,101 +201,33 @@ file.close()
 
 
 
-# BEGIN Add Explanations (In terms of both engineered and raw features)
+# BEGIN Add Explanations (In terms of engineered features)
 from interpret.ext.blackbox import TabularExplainer
-# BEGIN Add Raw Explanations
 
 # Fit the model
 regressor_pipeline.fit(X_test, y_test.values.ravel())
 
-# Send ColumnTransformer preprocessor inside regressor_pipeline in TabularExplainer construction here
-# regressor_pipeline.steps[-1][1] returns the trained regression model
-# Pass transformation as an input to create the Explanation object in terms of Raw Features that are not One Hot Encoded
-# Explain in terms of engineered features
-# NOTE: regressor_pipeline.steps[-1][1] contains the Model
-# NOTE: "features" field is optional for TabularExplainers
-raw_explainer = TabularExplainer(regressor_pipeline.steps[-1][1],
-                                     initialization_examples=X_test,
-                                     features=p_feature_names,
-                                     transformations=regressor_pipeline['preprocessor'])
-# Explain results with this Explainer and upload the Explanation...
-
-# Get Global Explanations of raw features, global as in 'of total data'...
-# You can use the training data or the test data here, but test data would allow you to use Explanation Exploration
-# print("X_test, line value before raw_explainer.explain_global: \n" + str(X_test))
-global_explanation = raw_explainer.explain_global(X_test, y_test)
-# If you used the PFIExplainer in the previous step, use the next line of code instead
-# global_explanation = raw_explainer.explain_global(x_test, true_labels=y_test)
-# Sorted feature importance values and feature names
-sorted_global_importance_values = global_explanation.get_ranked_global_values()
-sorted_global_importance_names = global_explanation.get_ranked_global_names()
-globalFeatureExplanations = dict(zip(sorted_global_importance_names, sorted_global_importance_values))
-print('globalFeatureExplanations: ', globalFeatureExplanations)
-# Alternatively, you can print out a dictionary that holds the top K feature names and values
-print('global_explanation.get_feature_importance_dict(): ', global_explanation.get_feature_importance_dict())
-
-# print("y_test value the line before client.upload_model_explanation(): \n" + str(y_test))
-# print("y_test.values.ravel() value passed as true_ys to client.upload_model_explanation(): \n" + str(y_test.values.ravel()))
 client = ExplanationClient.from_run(run)
-#           (perhaps can only have Explanation of one of Raw or Engineered features at once?)
-# Upload global model explanation data...
-# The explanation can then be downloaded on any compute
-# Multiple explanations can be uploaded
-# TODO? pass comments arguments as parameters
-client.upload_model_explanation(global_explanation, true_ys=y_test.values.ravel(), comment='global explanation: test dataset features, raw')
-# Or you can only upload the explanation object with the top k feature info with this...
-# client.upload_model_explanation(global_explanation, top_k=2, comment='global explanation: Only top 2 features')
-# END Add Raw Explanations
-
-
-
 
 # BEGIN Add Engineered Feature Explanations
-
-# Split training features into numeric and categoric dataframes
-numeric_X_test = pd.DataFrame(X_test[p_numeric_feature_names], dtype=np.str, columns=p_numeric_feature_names)
-categoric_X_test = pd.DataFrame(X_test[p_categoric_feature_names], dtype=np.str, columns=p_categoric_feature_names)
-# Fit and Run the numeric ColumnTransformers on the split dataframe to perform feature engineering
-regressor_pipeline['preprocessor'].transformers[0][1].fit(numeric_X_test)
-numeric_X_test_preprocessed = regressor_pipeline['preprocessor'].transformers[0][1].transform(numeric_X_test)
-numeric_X_test_preprocessed = pd.DataFrame(numeric_X_test_preprocessed, dtype=np.float, columns=p_numeric_feature_names)
-# Fit and Run the categoric ColumnTransformers on the split dataframe to perform feature engineering
-regressor_pipeline['preprocessor'].transformers[1][1].steps[0][1].fit(categoric_X_test)
-categoric_X_test_preprocessed = regressor_pipeline['preprocessor'].transformers[1][1].steps[0][1].transform(categoric_X_test)
-# Get and fit OneHotEncoder
-one_hot_encoder = regressor_pipeline['preprocessor'].transformers[1][1][1]
-one_hot_encoder.fit(categoric_X_test_preprocessed)
-# Get new One Hot Encoded column names
-df_encoded_categorical_column_names = one_hot_encoder.get_feature_names(p_categoric_feature_names)
-print("df_encoded_categorical_column_names", df_encoded_categorical_column_names)
-# Transform categoric, null-imputed features with fitted OneHotEncoder
-categoric_X_test_preprocessed = one_hot_encoder.transform(categoric_X_test_preprocessed)
-# Turn preprocessed categoric features into a DataFrame
-categoric_X_test_preprocessed = pd.DataFrame(categoric_X_test_preprocessed, dtype=np.float64, columns=df_encoded_categorical_column_names)
-
-# Combine the numeric DF with the categorical DF to submit to the regressor_pipeline
-X_test_preprocessed_list = [numeric_X_test_preprocessed, categoric_X_test_preprocessed]
-X_test_preprocessed = pd.concat(X_test_preprocessed_list, axis=1)
-
-
 # Save engineered features' names to create TabularExplainer with them
-engineeredFeatures=[*p_numeric_feature_names, *df_encoded_categorical_column_names]
+engineeredFeatureNames=[*p_categoric_feature_names]
 
 # Fit the model
-regressor_pipeline.steps[-1][1].fit(X_test_preprocessed, y_test)
+regressor_pipeline.steps[-1][1].fit(X_test, y_test)
 # Explain in terms of engineered features
 # NOTE: regressor_pipeline.steps[-1][1] contains the Model
 # NOTE: "features" field is optional for TabularExplainers
 from interpret.ext.blackbox import TabularExplainer
 engineered_explainer = TabularExplainer(regressor_pipeline.steps[-1][1],
-                                     initialization_examples=X_test_preprocessed,
-                                     features=engineeredFeatures)
+                                     initialization_examples=X_test,
+                                     features=engineeredFeatureNames)
 # Explain results with this Explainer and upload the Explanation...
 
 # Get Global Explanations of raw features, global as in 'of total data'...
 # You can use the training data or the test data here, but test data would allow you to use Explanation Exploration
 # print("X_test, line value before engineered_explainer.explain_global: \n" + str(X_test))
-global_explanation = engineered_explainer.explain_global(X_test_preprocessed, y_test)
+global_explanation = engineered_explainer.explain_global(X_test, y_test)
 # If you used the PFIExplainer in the previous step, use the next line of code instead
 # global_explanation = engineered_explainer.explain_global(X_test, true_labels=y_test)
 # Sorted feature importance values and feature names
@@ -310,62 +242,3 @@ print('global_explanation.get_feature_importance_dict(): ', global_explanation.g
 from azureml.interpret import ExplanationClient
 client = ExplanationClient.from_run(run)
 client.upload_model_explanation(global_explanation, true_ys=y_test.values.ravel(), comment='global explanation: test dataset features, engineered')
-
-
-
-
-
-
-
-
-
-
-
-# BEGIN Alternative code that was used to get Explanations of Model, it is more simple, not using a sklearn Pipeline to transform features...
-# from interpret.ext.blackbox import TabularExplainer
-
-# # "features" field is optional
-# explainer = TabularExplainer(model_DT, 
-#                              X_test, 
-#                              features=p_feature_names)
-
-# # BEGIN Get Global Explanations, global as in 'of total data'...
-
-# # You can use the training data or the test data here, but test data would allow you to use Explanation Exploration
-# # print("X_test, line value before explainer.explain_global: \n" + str(X_test))
-# global_explanation = explainer.explain_global(X_test, y_test)
-# # If you used the PFIExplainer in the previous step, use the next line of code instead
-# # global_explanation = explainer.explain_global(x_test, true_labels=y_test)
-# # Sorted feature importance values and feature names
-# sorted_global_importance_values = global_explanation.get_ranked_global_values()
-# sorted_global_importance_names = global_explanation.get_ranked_global_names()
-# globalFeatureExplanations = dict(zip(sorted_global_importance_names, sorted_global_importance_values))
-# print('globalFeatureExplanations: ', globalFeatureExplanations)
-# # Alternatively, you can print out a dictionary that holds the top K feature names and values
-# print('global_explanation.get_feature_importance_dict(): ', global_explanation.get_feature_importance_dict())
-
-# # BEGIN Uploading global model explanation data...
-# # The explanation can then be downloaded on any compute
-# # Multiple explanations can be uploaded
-# print("y_test value the line before client.upload_model_explanation(): \n" + str(y_test))
-# print("y_test.values.ravel() value passed as true_ys to client.upload_model_explanation(): \n" + str(y_test.values.ravel()))
-# client.upload_model_explanation(global_explanation, true_ys=y_test.values.ravel(), comment='global explanation: all features')
-# # Or you can only upload the explanation object with the top k feature info with this...
-# # client.upload_model_explanation(global_explanation, top_k=2, comment='global explanation: Only top 2 features')
-# # END Uploading global model explanation data...
-
-# # BEGIN Get local explanations of individual predictions
-# # Get explanation for the first few data points in the test set
-# # local_explanation = explainer.explain_local(X_test[0:5])
-# # Sorted feature importance values and feature names
-# # sorted_local_importance_names = local_explanation.get_ranked_local_names()
-# # print('sorted_local_importance_names: ', sorted_local_importance_names)
-# # print('len(sorted_local_importance_names): ', len(sorted_local_importance_names))
-# # sorted_local_importance_values = local_explanation.get_ranked_local_values()
-# # print('sorted_local_importance_values: ', sorted_local_importance_values)
-# # print('len(sorted_local_importance_values): ', len(sorted_local_importance_values)) 
-# # 
-# # THIS DOES NOT WORK LIKE IT DOES WITH THE GLOBAL_EXPLANATION, HOWEVER!
-# # client.upload_model_explanation(sorted_local_importance_values, comment='local explanation for data points 0-5: all features')
-# #
-# # END Get local explanations of individual predictions
