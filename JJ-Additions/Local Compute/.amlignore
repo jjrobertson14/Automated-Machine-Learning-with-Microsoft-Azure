@@ -4,3 +4,4 @@
 ./Pycaret and RAPIDS/*
 ./simple_python_to_json/*
 ./environment_out/*
+automl.log
