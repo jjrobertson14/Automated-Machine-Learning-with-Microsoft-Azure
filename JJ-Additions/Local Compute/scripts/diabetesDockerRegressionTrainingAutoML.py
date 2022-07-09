@@ -210,9 +210,6 @@ regressor_pipeline.fit(X_test, y_test.values.ravel())
 client = ExplanationClient.from_run(run)
 
 # BEGIN Add Engineered Feature Explanations
-# Save engineered features' names to create TabularExplainer with them
-engineeredFeatureNames=[*p_categoric_feature_names]
-
 # Fit the model
 regressor_pipeline.steps[-1][1].fit(X_test, y_test)
 # Explain in terms of engineered features
@@ -221,7 +218,7 @@ regressor_pipeline.steps[-1][1].fit(X_test, y_test)
 from interpret.ext.blackbox import TabularExplainer
 engineered_explainer = TabularExplainer(regressor_pipeline.steps[-1][1],
                                      initialization_examples=X_test,
-                                     features=engineeredFeatureNames)
+                                     features=p_feature_names)
 # Explain results with this Explainer and upload the Explanation...
 
 # Get Global Explanations of raw features, global as in 'of total data'...
