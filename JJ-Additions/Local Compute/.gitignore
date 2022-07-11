@@ -8,3 +8,4 @@ explanation/*
 custom_env_vars_for_script_inside_docker_container
 environment_out/*
 automl.log
+Scratch/*
