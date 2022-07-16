@@ -1,6 +1,5 @@
-from azureml.core import Workspace, Dataset, Datastore
+from azureml.core import Workspace, Dataset, Datastore, Experiment
 from azureml.core.run import Run
-from azureml.interpret import ExplanationClient
 
 import getopt
 import joblib
@@ -36,7 +35,7 @@ long_options = [
     'out-model-file-name=',
     'numeric-feature-names=',
     'categoric-feature-names=',
-    'x-train-test-y-train-test='
+    'x-train-test-y-train-test-combined-train-test='
 ]
 opts, args = getopt.getopt(argv, None, long_options)
 # except:
@@ -83,23 +82,25 @@ for opt, arg in opts:
         # (Now split on comma to have a list)
         p_categoric_feature_names = p_categoric_feature_names.split(',')
         print('On split, p_categoric_feature_names was set with value: ', p_categoric_feature_names)
-    elif opt == '--x-train-test-y-train-test':
+    elif opt == '--x-train-test-y-train-test-combined-train-test':
         # Take in string encoding of list of categoric feature names, turn back into a list
-        xTrainTestYTrainTest = arg
+        xTrainTestYTrainTestCombinedTrainTest = arg
         # The arg value is a string that looks like a list: '["datasetName1","datasetName2"]'
         # So,turn string of features into list of features
         # (Remove square brackets and " marks)
-        xTrainTestYTrainTest = xTrainTestYTrainTest.replace("[","")
-        xTrainTestYTrainTest = xTrainTestYTrainTest.replace("]","")
-        xTrainTestYTrainTest = xTrainTestYTrainTest.replace("\"","")
-        print('On character replacement, xTrainTestYTrainTest was set with value: ', xTrainTestYTrainTest)
+        xTrainTestYTrainTestCombinedTrainTest = xTrainTestYTrainTestCombinedTrainTest.replace("[","")
+        xTrainTestYTrainTestCombinedTrainTest = xTrainTestYTrainTestCombinedTrainTest.replace("]","")
+        xTrainTestYTrainTestCombinedTrainTest = xTrainTestYTrainTestCombinedTrainTest.replace("\"","")
+        print('On character replacement, xTrainTestYTrainTestCombinedTrainTest was set with value: ', xTrainTestYTrainTestCombinedTrainTest)
         # (Now split on comma to have a list)
-        xTrainTestYTrainTest = xTrainTestYTrainTest.split(',')
-        print('On split, xTrainTestYTrainTest was set with value: ', xTrainTestYTrainTest)
-        X_train_registered_name = xTrainTestYTrainTest[0]
-        X_test_registered_name = xTrainTestYTrainTest[1]
-        y_train_registered_name = xTrainTestYTrainTest[2]
-        y_test_registered_name = xTrainTestYTrainTest[3]
+        xTrainTestYTrainTestCombinedTrainTest = xTrainTestYTrainTestCombinedTrainTest.split(',')
+        print('On split, xTrainTestYTrainTestCombinedTrainTest was set with value: ', xTrainTestYTrainTestCombinedTrainTest)
+        X_train_registered_name = xTrainTestYTrainTestCombinedTrainTest[0]
+        X_test_registered_name = xTrainTestYTrainTestCombinedTrainTest[1]
+        y_train_registered_name = xTrainTestYTrainTestCombinedTrainTest[2]
+        y_test_registered_name = xTrainTestYTrainTestCombinedTrainTest[3]
+        train_data_registered_name = xTrainTestYTrainTestCombinedTrainTest[4]
+        test_data_registered_name = xTrainTestYTrainTestCombinedTrainTest[5]
     else:
         print("Unrecognized option passed, continuing run, it is: " + opt)
 
@@ -144,34 +145,86 @@ sep='\n')
 run = Run.get_context()
 run.log(name='creating outputs and logs directory...', value=0)
 run.log(os.makedirs('./outputs', exist_ok=True), value=0)
-run.log(os.makedirs('./outputs', exist_ok=True), value=0)
+run.log(os.makedirs('./logs', exist_ok=True), value=0)
 
 # BEGIN Get Data
 # Create datastore, try getting datastore via Workspace object
 datastore = Datastore.get_default(ws)
 datastore = Datastore.get(ws, p_datastore_name)
 
-# Get DataSet for training from the datastore of the Workspace
+# Get the split (by whether target column) Datasets for training and testing from the datastore of the Workspace
 # (having registered them already in Notebook code)
-# (later) TODO?: remove hardcoding the names of the datasets to get and allow passing them as a --argument 
-X_train = Dataset.get_by_name(ws, X_train_registered_name, version = 'latest').to_pandas_dataframe()
+# X_train = Dataset.get_by_name(ws, X_train_registered_name, version = 'latest').to_pandas_dataframe()
 X_test  = Dataset.get_by_name(ws, X_test_registered_name, version = 'latest').to_pandas_dataframe()
-y_train = Dataset.get_by_name(ws, y_train_registered_name, version = 'latest').to_pandas_dataframe()
+# y_train = Dataset.get_by_name(ws, y_train_registered_name, version = 'latest').to_pandas_dataframe()
 y_test = Dataset.get_by_name(ws, y_test_registered_name, version = 'latest').to_pandas_dataframe()
-data = {"train": {"X": X_train, "y": y_train},
-        "test": {"X": X_test, "y": y_test}}
 
-# Unpickle the SciKit Pipline (that performs Transformation and Model Training)
-with open('resources/regressor_pipeline.pickle', 'rb') as file:
-    regressor_pipeline = pickle.load(file)
-    print(regressor_pipeline)
+# Create training and testing data to give to AutoMLConfig
+train_data = Dataset.get_by_name(ws, train_data_registered_name, version = 'latest').to_pandas_dataframe()
+test_data = Dataset.get_by_name(ws, test_data_registered_name, version = 'latest').to_pandas_dataframe()
 
-# Run training Pipeline
-model_DT = regressor_pipeline.fit(X_train,y_train)
+# Use AutoML to generate models
+from azureml.train.automl import AutoMLConfig
+from azureml.widgets import RunDetails
+
+# Basic Variables for AutoMLConfig
+target_column = 'Y'
+task = 'regression'
+primary_metric = 'normalized_root_mean_squared_error'
+featurization = 'auto'
+
+# Define Compute Cluster to use
+compute_target = 'local'
+
+# AutoMLConfig
+autoMLConfig = AutoMLConfig(task=task,
+                      primary_metric=primary_metric,
+                      featurization=featurization,
+                      compute_target=compute_target,
+                      training_data=train_data,
+                      test_data=test_data,
+                      label_column_name=target_column,
+                      experiment_timeout_minutes=15,
+                      enable_early_stopping=True,
+                      n_cross_validations=5,
+                      model_explainability=True)
+
+# TODO run autoML training from here
+#       - perhaps create a child run (Run.child_run to create a child run)
+#           - (https://docs.microsoft.com/en-us/python/api/azureml-core/azureml.core.run.run?view=azure-ml-py)
+#       - perhaps look up using ScriptRunConfig along with AutoMLConfig
+# TODO Get Best Model from the AutoML run
+experiment_name = 'Diabetes_Docker_Regression_Training_AutoML'
+experiment = Experiment(workspace=ws, name=experiment_name)
+AutoML_run = experiment.submit(autoMLConfig, show_output = True)
+RunDetails(AutoML_run).show()
+print("calling wait_for_completion on the AutoML_run")
+AutoML_run.wait_for_completion()
+# TODO stop "Exiting early"
+print("Exiting early")
+exit()
+
+# TODO replace with the following notation
+#    automl_settings = {
+#        "n_cross_validations": 3,
+#        "primary_metric": 'r2_score',
+#        "enable_early_stopping": True,
+#        "experiment_timeout_hours": 1.0,
+#        "max_concurrent_iterations": 4,
+#        "max_cores_per_iteration": -1,
+#        "verbosity": logging.INFO,
+#    }
+
+#    autoMLConfig = AutoMLConfig(task = 'regression',
+#                                compute_target = compute_target,
+#                                training_data = train_data,
+#                                label_column_name = label,
+#                                **automl_settings
+#                                )
 
 # Training the model is as simple as this
 # We use the predict() on the model to predict the output
-prediction = model_DT.predict(X_test)
+prediction = bestModel.predict(X_test)
 
 # Log regression metrics to evaluate the model with, using R2 score and RSME score for Regression here
 r2 = r2_score(y_test, prediction)
@@ -195,7 +248,7 @@ run.log('rsme', rsme)
 # Save the output model to a file...
 # ... This is required for the model to get automatically uploaded by the Notebook using this script
 with open(p_out_model_file_name, "wb") as file:
-    joblib.dump(value=model_DT, filename=os.path.join('./outputs/', p_out_model_file_name))
+    joblib.dump(value=bestModel, filename=os.path.join('./outputs/', p_out_model_file_name))
 file.close()
 
 
@@ -203,20 +256,18 @@ file.close()
 
 # BEGIN Add Explanations (In terms of engineered features)
 from interpret.ext.blackbox import TabularExplainer
-
-# Fit the model
-regressor_pipeline.fit(X_test, y_test.values.ravel())
-
+from azureml.interpret import ExplanationClient
 client = ExplanationClient.from_run(run)
 
+# TODO get explanations working by giving model to the explainer
 # BEGIN Add Engineered Feature Explanations
 # Fit the model
-regressor_pipeline.steps[-1][1].fit(X_test, y_test)
+bestModel = "blah"
 # Explain in terms of engineered features
 # NOTE: regressor_pipeline.steps[-1][1] contains the Model
 # NOTE: "features" field is optional for TabularExplainers
 from interpret.ext.blackbox import TabularExplainer
-engineered_explainer = TabularExplainer(regressor_pipeline.steps[-1][1],
+engineered_explainer = TabularExplainer(bestModel,
                                      initialization_examples=X_test,
                                      features=p_feature_names)
 # Explain results with this Explainer and upload the Explanation...
@@ -236,6 +287,5 @@ print('globalFeatureExplanations: ', globalFeatureExplanations)
 print('global_explanation.get_feature_importance_dict(): ', global_explanation.get_feature_importance_dict())
 
 # Upload the explanation in terms of engineered features
-from azureml.interpret import ExplanationClient
 client = ExplanationClient.from_run(run)
 client.upload_model_explanation(global_explanation, true_ys=y_test.values.ravel(), comment='global explanation: test dataset features, engineered')
