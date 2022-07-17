@@ -1,0 +1,498 @@
+NOTE: this is from running a Dockerfile in my own 
+      WSL to try and figure out what error is happening on 
+      (1) the registered_docker_env.build_local call, and 
+      (2) the build within Azure of the Docker image
+
+
+
+
+
+
+$ sudo docker build --network=bridge .
+Sending build context to Docker daemon  9.216kB
+Step 1/7 : FROM mcr.microsoft.com/azureml/openmpi3.1.2-ubuntu18.04:20220314.v1
+ ---> 849454c66968
+Step 2/7 : ARG DEBIAN_FRONTEND=noninteractive
+ ---> Using cache
+ ---> 8b3733db71bf
+Step 3/7 : ARG ACCEPT_EULA=Y
+ ---> Using cache
+ ---> d00994c76337
+Step 4/7 : RUN apt-get update -y && apt-get upgrade -y &&    apt-get install -y build-essential                        cmake                        curl                        gfortran                        git                        jupyter                        libatlas-base-dev                        libblas-dev
+  libbz2-dev                        libffi-dev                        libgdbm-dev                        liblapack-dev                        liblzma-dev                        libncurses5-dev                        libncursesw5-dev                        libreadline-dev                        libsqlite3-dev                        libssl-dev                        libxml2-dev                        libxmlsec1-dev                        llvm                        lzma                        lzma-dev                        make                        tcl-dev                        tk-dev                        wget                        xz-utils                        zlib1g-dev
+ ---> Using cache
+ ---> 2d6e582bed44
+Step 5/7 : COPY './conda_dependencies.yml' .
+ ---> d8406c33381c
+Step 6/7 : RUN conda env create -f './conda_dependencies.yml'
+ ---> Running in 6c3abee42ec2
+Collecting package metadata (repodata.json): ...working... done
+Solving environment: ...working... done
+
+Downloading and Extracting Packages
+mkl_random-1.1.0     | 369 KB    | ########## | 100%
+certifi-2021.5.30    | 141 KB    | ########## | 100%
+tk-8.6.12            | 3.3 MB    | ########## | 100%
+pip-21.2.2           | 2.1 MB    | ########## | 100%
+joblib-1.0.1         | 207 KB    | ########## | 100%
+libstdcxx-ng-11.2.0  | 6.1 MB    | ########## | 100%
+libedit-3.1          | 171 KB    | ########## | 100%
+setuptools-58.0.4    | 979 KB    | ########## | 100%
+readline-7.0         | 387 KB    | ########## | 100%
+pytz-2021.3          | 224 KB    | ########## | 100%
+python-dateutil-2.8. | 241 KB    | ########## | 100%
+wheel-0.37.1         | 31 KB     | ########## | 100%
+libgomp-11.2.0       | 560 KB    | ########## | 100%
+mkl_fft-1.3.0        | 185 KB    | ########## | 100%
+intel-openmp-2022.0. | 8.5 MB    | ########## | 100%
+zlib-1.2.12          | 130 KB    | ########## | 100%
+openssl-1.0.2u       | 3.1 MB    | ########## | 100%
+py4j-0.10.7          | 251 KB    | ########## | 100%
+libgfortran4-7.5.0   | 1.3 MB    | ########## | 100%
+_openmp_mutex-5.1    | 20 KB     | ########## | 100%
+pyspark-2.4.5        | 207.0 MB  | ########## | 100%
+scipy-1.5.2          | 18.5 MB   | ########## | 100%
+numpy-base-1.19.2    | 5.2 MB    | ########## | 100%
+ca-certificates-2022 | 132 KB    | ########## | 100%
+sqlite-3.23.1        | 1.5 MB    | ########## | 100%
+python-3.6.2         | 27.0 MB   | ########## | 100%
+_libgcc_mutex-0.1    | 3 KB      | ########## | 100%
+libgcc-ng-11.2.0     | 8.5 MB    | ########## | 100%
+blas-1.0             | 6 KB      | ########## | 100%
+mkl-2019.4           | 204.1 MB  | ########## | 100%
+xz-5.2.5             | 389 KB    | ########## | 100%
+libgfortran-ng-7.5.0 | 22 KB     | ########## | 100%
+scikit-learn-0.24.2  | 7.1 MB    | ########## | 100%
+threadpoolctl-2.2.0  | 16 KB     | ########## | 100%
+mkl-service-2.3.0    | 56 KB     | ########## | 100%
+six-1.16.0           | 19 KB     | ########## | 100%
+pandas-1.1.5         | 10.5 MB   | ########## | 100%
+libffi-3.2.1         | 52 KB     | ########## | 100%
+ncurses-6.0          | 907 KB    | ########## | 100%
+numpy-1.19.2         | 21 KB     | ########## | 100%
+Preparing transaction: ...working... done
+Verifying transaction: ...working... done
+Executing transaction: ...working...
+
+    Installed package of scikit-learn can be accelerated using scikit-learn-intelex.
+    More details are available here: https://intel.github.io/scikit-learn-intelex
+
+    For example:
+
+        $ conda install scikit-learn-intelex
+        $ python -m sklearnex my_application.py
+
+
+
+done
+Installing pip dependencies: ...working... Ran pip subprocess with arguments:
+['/opt/miniconda/envs/project_environment/bin/python', '-m', 'pip', 'install', '-U', '-r', '/condaenv.ycq02jat.requirements.txt']
+Pip subprocess output:
+Collecting azureml.interpret
+  Downloading azureml_interpret-1.43.0-py3-none-any.whl (52 kB)
+Collecting azureml-dataset-runtime
+  Downloading azureml_dataset_runtime-1.43.0.post2-py3-none-any.whl (2.3 kB)
+Collecting azureml.train
+  Downloading azureml_train-1.43.0-py3-none-any.whl (2.2 kB)
+Collecting azureml.train.automl
+  Downloading azureml_train_automl-1.43.0-py3-none-any.whl (2.3 kB)
+Collecting jinja2
+  Downloading Jinja2-3.0.3-py3-none-any.whl (133 kB)
+Collecting MarkupSafe
+  Downloading MarkupSafe-2.0.1-cp36-cp36m-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl (30 kB)
+Collecting raiwidgets
+  Downloading raiwidgets-0.19.0-py3-none-any.whl (2.3 MB)
+Collecting python-dotenv
+  Downloading python_dotenv-0.20.0-py3-none-any.whl (17 kB)
+Collecting pybridge
+  Downloading pybridge-1.0.1.zip (4.8 kB)
+Collecting shap<0.40.0
+  Downloading shap-0.39.0.tar.gz (356 kB)
+Requirement already satisfied: numpy<=1.20.* in /opt/miniconda/envs/project_environment/lib/python3.6/site-packages (from azureml.interpret->-r /condaenv.ycq02jat.requirements.txt (line 1)) (1.19.2)
+Collecting numba<0.54.0
+  Downloading numba-0.53.1-cp36-cp36m-manylinux2014_x86_64.whl (3.4 MB)
+Collecting interpret-community==0.26.*
+  Downloading interpret_community-0.26.0-py3-none-any.whl (130 kB)
+Collecting azureml-core~=1.43.0
+  Downloading azureml_core-1.43.0-py3-none-any.whl (2.7 MB)
+Requirement already satisfied: scipy in /opt/miniconda/envs/project_environment/lib/python3.6/site-packages (from interpret-community==0.26.*->azureml.interpret->-r /condaenv.ycq02jat.requirements.txt (line 1)) (1.5.2)
+Requirement already satisfied: scikit-learn in /opt/miniconda/envs/project_environment/lib/python3.6/site-packages (from interpret-community==0.26.*->azureml.interpret->-r /condaenv.ycq02jat.requirements.txt (line 1)) (0.24.2)
+Collecting ml-wrappers==0.2.0
+  Downloading ml_wrappers-0.2.0-py3-none-any.whl (29 kB)
+Requirement already satisfied: pandas in /opt/miniconda/envs/project_environment/lib/python3.6/site-packages (from interpret-community==0.26.*->azureml.interpret->-r /condaenv.ycq02jat.requirements.txt (line 1)) (1.1.5)
+Collecting packaging
+  Downloading packaging-21.3-py3-none-any.whl (40 kB)
+Collecting interpret-core[required]<=0.2.7,>=0.1.20
+  Downloading interpret_core-0.2.7-py3-none-any.whl (6.6 MB)
+Collecting azureml-dataprep<4.1.0a,>=4.0.0a
+  Downloading azureml_dataprep-4.0.4-py3-none-any.whl (43.4 MB)
+Collecting pyarrow<4.0.0,>=0.17.0
+  Downloading pyarrow-3.0.0-cp36-cp36m-manylinux2014_x86_64.whl (20.7 MB)
+Collecting azureml-train-core~=1.43.0
+  Downloading azureml_train_core-1.43.0-py3-none-any.whl (8.6 MB)
+Collecting azureml-train-automl-runtime~=1.43.0
+  Downloading azureml_train_automl_runtime-1.43.0.post1-py3-none-any.whl (311 kB)
+Collecting azureml-automl-runtime~=1.43.0
+  Downloading azureml_automl_runtime-1.43.0-py3-none-any.whl (2.1 MB)
+Collecting azureml-automl-core~=1.43.0
+  Downloading azureml_automl_core-1.43.0.post2-py3-none-any.whl (238 kB)
+Collecting azureml-train-automl-client~=1.43.0
+  Downloading azureml_train_automl_client-1.43.0-py3-none-any.whl (135 kB)
+Collecting rai-core-flask==0.3.0
+  Downloading rai_core_flask-0.3.0-py3-none-any.whl (11 kB)
+Collecting itsdangerous==2.0.1
+  Downloading itsdangerous-2.0.1-py3-none-any.whl (18 kB)
+Collecting lightgbm>=2.0.11
+  Downloading lightgbm-3.3.2-py3-none-manylinux1_x86_64.whl (2.0 MB)
+Collecting erroranalysis>=0.3.2
+  Downloading erroranalysis-0.3.4-py3-none-any.whl (32 kB)
+Collecting jinja2
+  Downloading Jinja2-2.11.3-py2.py3-none-any.whl (125 kB)
+Collecting fairlearn>=0.7.0
+  Downloading fairlearn-0.7.0-py3-none-any.whl (177 kB)
+Collecting responsibleai==0.19.0
+  Downloading responsibleai-0.19.0-py3-none-any.whl (115 kB)
+Collecting Flask~=1.1.0
+  Downloading Flask-1.1.4-py2.py3-none-any.whl (94 kB)
+Collecting Flask-Cors==3.0.10
+  Downloading Flask_Cors-3.0.10-py2.py3-none-any.whl (14 kB)
+Collecting Werkzeug<2.1.0
+  Downloading Werkzeug-2.0.3-py3-none-any.whl (289 kB)
+Collecting ipython==7.16.3
+  Downloading ipython-7.16.3-py3-none-any.whl (783 kB)
+Collecting gevent==21.12.0
+  Downloading gevent-21.12.0-cp36-cp36m-manylinux_2_12_x86_64.manylinux2010_x86_64.whl (5.6 MB)
+Collecting greenlet==1.1.2
+  Downloading greenlet-1.1.2-cp36-cp36m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (147 kB)
+Requirement already satisfied: Six in /opt/miniconda/envs/project_environment/lib/python3.6/site-packages (from Flask-Cors==3.0.10->rai-core-flask==0.3.0->raiwidgets->-r /condaenv.ycq02jat.requirements.txt (line 7)) (1.16.0)
+Requirement already satisfied: setuptools in /opt/miniconda/envs/project_environment/lib/python3.6/site-packages (from gevent==21.12.0->rai-core-flask==0.3.0->raiwidgets->-r /condaenv.ycq02jat.requirements.txt (line 7)) (58.0.4)
+Collecting zope.event
+  Downloading zope.event-4.5.0-py2.py3-none-any.whl (6.8 kB)
+Collecting zope.interface
+  Downloading zope.interface-5.4.0-cp36-cp36m-manylinux2010_x86_64.whl (251 kB)
+Collecting backcall
+  Downloading backcall-0.2.0-py2.py3-none-any.whl (11 kB)
+Collecting pygments
+  Downloading Pygments-2.12.0-py3-none-any.whl (1.1 MB)
+Collecting pickleshare
+  Downloading pickleshare-0.7.5-py2.py3-none-any.whl (6.9 kB)
+Collecting prompt-toolkit!=3.0.0,!=3.0.1,<3.1.0,>=2.0.0
+  Downloading prompt_toolkit-3.0.30-py3-none-any.whl (381 kB)
+Collecting traitlets>=4.2
+  Downloading traitlets-4.3.3-py2.py3-none-any.whl (75 kB)
+Collecting jedi<=0.17.2,>=0.10
+  Downloading jedi-0.17.2-py2.py3-none-any.whl (1.4 MB)
+Collecting decorator
+  Downloading decorator-5.1.1-py3-none-any.whl (9.1 kB)
+Collecting pexpect
+  Downloading pexpect-4.8.0-py2.py3-none-any.whl (59 kB)
+Collecting raiutils>=0.1.0
+  Downloading raiutils-0.2.0-py3-none-any.whl (9.6 kB)
+Collecting ipykernel<=6.6.0
+  Downloading ipykernel-5.5.6-py3-none-any.whl (121 kB)
+Collecting dice-ml<0.9,>=0.8
+  Downloading dice_ml-0.8-py3-none-any.whl (213 kB)
+Collecting networkx<=2.5
+  Downloading networkx-2.5-py3-none-any.whl (1.6 MB)
+Collecting jsonschema
+  Downloading jsonschema-3.2.0-py2.py3-none-any.whl (56 kB)
+Collecting semver~=2.13.0
+  Downloading semver-2.13.0-py2.py3-none-any.whl (12 kB)
+Collecting econml~=0.12.0
+  Downloading econml-0.12.0-cp36-cp36m-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl (3.1 MB)
+Collecting azureml-telemetry~=1.43.0
+  Downloading azureml_telemetry-1.43.0-py3-none-any.whl (30 kB)
+Collecting lightgbm>=2.0.11
+  Downloading lightgbm-3.2.1-py3-none-manylinux1_x86_64.whl (2.0 MB)
+Collecting sklearn-pandas<=1.7.0,>=1.4.0
+  Downloading sklearn_pandas-1.7.0-py2.py3-none-any.whl (10 kB)
+Collecting statsmodels<0.12,>=0.11.0
+  Downloading statsmodels-0.11.1-cp36-cp36m-manylinux1_x86_64.whl (8.7 MB)
+Collecting dill<0.4.0,>=0.2.8
+  Downloading dill-0.3.4-py2.py3-none-any.whl (86 kB)
+Collecting joblib==0.14.1
+  Downloading joblib-0.14.1-py2.py3-none-any.whl (294 kB)
+Collecting dataclasses<=0.8,>=0.6
+  Downloading dataclasses-0.8-py3-none-any.whl (19 kB)
+Collecting onnxconverter-common<=1.6.0,>=1.4.2
+  Downloading onnxconverter_common-1.6.0-py2.py3-none-any.whl (43 kB)
+Collecting psutil<6.0.0,>=5.2.2
+  Downloading psutil-5.9.1-cp36-cp36m-manylinux_2_12_x86_64.manylinux2010_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl (280 kB)
+Collecting onnxruntime<1.9.0,>=1.3.0
+  Downloading onnxruntime-1.8.1-cp36-cp36m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (4.5 MB)
+Collecting botocore<=1.23.19
+  Downloading botocore-1.23.19-py3-none-any.whl (8.4 MB)
+Collecting scikit-learn
+  Downloading scikit_learn-0.22.2.post1-cp36-cp36m-manylinux1_x86_64.whl (7.1 MB)
+Collecting onnxmltools==1.4.1
+  Downloading onnxmltools-1.4.1-py2.py3-none-any.whl (371 kB)
+Collecting dotnetcore2<4.0.0,>=3.0.0
+  Downloading dotnetcore2-3.1.23-py3-none-manylinux1_x86_64.whl (31.1 MB)
+Collecting nimbusml<=1.8.0,>=1.7.1
+  Downloading nimbusml-1.8.0-cp36-none-manylinux1_x86_64.whl (114.1 MB)
+Collecting gensim<3.9.0
+  Downloading gensim-3.8.3-cp36-cp36m-manylinux1_x86_64.whl (24.2 MB)
+Collecting boto3<=1.20.19
+  Downloading boto3-1.20.19-py3-none-any.whl (131 kB)
+Collecting skl2onnx==1.4.9
+  Downloading skl2onnx-1.4.9-py2.py3-none-any.whl (114 kB)
+Collecting azureml-training-tabular~=1.43.0
+  Downloading azureml_training_tabular-1.43.0-py3-none-any.whl (1.7 MB)
+Collecting protobuf<4.0.0
+  Downloading protobuf-3.19.4-cp36-cp36m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (1.1 MB)
+Collecting onnx<=1.7.0,>=1.6.0
+  Downloading onnx-1.7.0-cp36-cp36m-manylinux1_x86_64.whl (7.4 MB)
+Collecting pmdarima==1.7.1
+  Downloading pmdarima-1.7.1-cp36-cp36m-manylinux1_x86_64.whl (1.5 MB)
+Collecting smart-open<=1.9.0
+  Downloading smart_open-1.9.0.tar.gz (70 kB)
+Collecting keras2onnx<=1.6.0,>=1.4.0
+  Downloading keras2onnx-1.6.0-py3-none-any.whl (219 kB)
+Requirement already satisfied: python-dateutil>=2.7.3 in /opt/miniconda/envs/project_environment/lib/python3.6/site-packages (from pandas->interpret-community==0.26.*->azureml.interpret->-r /condaenv.ycq02jat.requirements.txt (line 1)) (2.8.2)
+Requirement already satisfied: pytz>=2017.2 in /opt/miniconda/envs/project_environment/lib/python3.6/site-packages (from pandas->interpret-community==0.26.*->azureml.interpret->-r /condaenv.ycq02jat.requirements.txt (line 1)) (2021.3)
+Collecting Cython<0.29.18,>=0.29
+  Downloading Cython-0.29.17-cp36-cp36m-manylinux1_x86_64.whl (2.1 MB)
+Collecting setuptools
+  Downloading setuptools-49.6.0-py3-none-any.whl (803 kB)
+Collecting urllib3
+  Downloading urllib3-1.26.10-py2.py3-none-any.whl (139 kB)
+Collecting adal<=1.2.7,>=1.2.0
+  Downloading adal-1.2.7-py2.py3-none-any.whl (55 kB)
+Collecting pyopenssl<23.0.0
+  Downloading pyOpenSSL-22.0.0-py2.py3-none-any.whl (55 kB)
+Collecting azure-mgmt-resource<22.0.0,>=15.0.0
+  Downloading azure_mgmt_resource-21.1.0-py3-none-any.whl (1.8 MB)
+Collecting PyJWT<3.0.0
+  Downloading PyJWT-2.4.0-py3-none-any.whl (18 kB)
+Collecting humanfriendly<11.0,>=4.7
+  Downloading humanfriendly-10.0-py2.py3-none-any.whl (86 kB)
+Collecting paramiko<3.0.0,>=2.0.8
+  Downloading paramiko-2.11.0-py2.py3-none-any.whl (212 kB)
+Collecting jmespath<=1.0.0
+  Downloading jmespath-0.10.0-py2.py3-none-any.whl (24 kB)
+Collecting azure-common<2.0.0,>=1.1.12
+  Downloading azure_common-1.1.28-py2.py3-none-any.whl (14 kB)
+Collecting msrest<0.7.0,>=0.5.1
+  Downloading msrest-0.6.21-py2.py3-none-any.whl (85 kB)
+Collecting azure-graphrbac<1.0.0,>=0.40.0
+  Downloading azure_graphrbac-0.61.1-py2.py3-none-any.whl (141 kB)
+Collecting backports.tempfile
+  Downloading backports.tempfile-1.0-py2.py3-none-any.whl (4.4 kB)
+Collecting ndg-httpsclient<=0.5.1
+  Downloading ndg_httpsclient-0.5.1-py3-none-any.whl (34 kB)
+Collecting requests[socks]<3.0.0,>=2.19.1
+  Downloading requests-2.27.1-py2.py3-none-any.whl (63 kB)
+Collecting pathspec<1.0.0
+  Downloading pathspec-0.9.0-py2.py3-none-any.whl (31 kB)
+Collecting msal-extensions<=1.0.0,>=0.3.0
+  Downloading msal_extensions-1.0.0-py2.py3-none-any.whl (19 kB)
+Collecting jsonpickle<3.0.0
+  Downloading jsonpickle-2.2.0-py2.py3-none-any.whl (39 kB)
+Collecting azure-mgmt-keyvault<11.0.0,>=0.40.0
+  Downloading azure_mgmt_keyvault-10.0.0-py3-none-any.whl (489 kB)
+Collecting SecretStorage<4.0.0
+  Downloading SecretStorage-3.3.2-py3-none-any.whl (15 kB)
+Collecting azure-core<2.0.0
+  Downloading azure_core-1.24.2-py3-none-any.whl (178 kB)
+Collecting azure-mgmt-storage<=20.0.0,>=16.0.0
+  Downloading azure_mgmt_storage-20.0.0-py3-none-any.whl (2.0 MB)
+Collecting azure-mgmt-core<=1.3.0
+  Downloading azure_mgmt_core-1.3.0-py2.py3-none-any.whl (25 kB)
+Collecting pkginfo
+  Downloading pkginfo-1.8.3-py2.py3-none-any.whl (26 kB)
+Collecting azure-mgmt-containerregistry<11,>=8.2.0
+  Downloading azure_mgmt_containerregistry-10.0.0-py3-none-any.whl (1.2 MB)
+Collecting argcomplete<3
+  Downloading argcomplete-2.0.0-py2.py3-none-any.whl (37 kB)
+Collecting contextlib2<22.0.0
+  Downloading contextlib2-21.6.0-py2.py3-none-any.whl (13 kB)
+Collecting docker<6.0.0
+  Downloading docker-5.0.3-py2.py3-none-any.whl (146 kB)
+Collecting azure-mgmt-authorization<3,>=0.40.0
+  Downloading azure_mgmt_authorization-2.0.0-py2.py3-none-any.whl (465 kB)
+Collecting cryptography!=1.9,!=2.0.*,!=2.1.*,!=2.2.*,<38.0.0
+  Downloading cryptography-37.0.4-cp36-abi3-manylinux_2_24_x86_64.whl (4.1 MB)
+Collecting knack~=0.9.0
+  Downloading knack-0.9.0-py3-none-any.whl (59 kB)
+Collecting urllib3
+  Downloading urllib3-1.26.9-py2.py3-none-any.whl (138 kB)
+Collecting msal<2.0.0,>=1.15.0
+  Downloading msal-1.18.0-py2.py3-none-any.whl (82 kB)
+Collecting msrestazure<=0.6.4,>=0.4.33
+  Downloading msrestazure-0.6.4-py2.py3-none-any.whl (40 kB)
+Collecting importlib-metadata<5,>=0.23
+  Downloading importlib_metadata-4.8.3-py3-none-any.whl (17 kB)
+Collecting typing-extensions>=4.0.1
+  Downloading typing_extensions-4.1.1-py3-none-any.whl (26 kB)
+Collecting cloudpickle<3.0.0,>=1.1.0
+  Downloading cloudpickle-2.1.0-py3-none-any.whl (25 kB)
+Collecting azureml-dataprep-native<39.0.0,>=38.0.0
+  Downloading azureml_dataprep_native-38.0.0-cp36-cp36m-manylinux1_x86_64.whl (1.3 MB)
+Collecting azure-identity==1.7.0
+  Downloading azure_identity-1.7.0-py2.py3-none-any.whl (129 kB)
+Collecting azureml-dataprep-rslex~=2.6.0dev0
+  Downloading azureml_dataprep_rslex-2.6.3-cp36-cp36m-manylinux2010_x86_64.whl (15.5 MB)
+Collecting pyyaml<7.0.0,>=5.1.0
+  Downloading PyYAML-6.0-cp36-cp36m-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl (603 kB)
+Collecting msal-extensions<=1.0.0,>=0.3.0
+  Downloading msal_extensions-0.3.1-py2.py3-none-any.whl (18 kB)
+Collecting fusepy<4.0.0,>=3.0.1
+  Downloading fusepy-3.0.1.tar.gz (11 kB)
+Collecting applicationinsights
+  Downloading applicationinsights-0.11.10-py2.py3-none-any.whl (55 kB)
+Collecting azure-storage-queue~=12.1
+  Downloading azure_storage_queue-12.4.0-py3-none-any.whl (151 kB)
+Collecting azureml-mlflow~=1.43.0
+  Downloading azureml_mlflow-1.43.0.post1-py3-none-any.whl (809 kB)
+Collecting azureml-defaults~=1.43.0
+  Downloading azureml_defaults-1.43.0-py3-none-any.whl (2.0 kB)
+Collecting dask[complete]<=2.30.0
+  Downloading dask-2.30.0-py3-none-any.whl (848 kB)
+Collecting distributed<=2.30.1
+  Downloading distributed-2.30.1-py3-none-any.whl (656 kB)
+Collecting azureml-train-automl-runtime~=1.43.0
+  Downloading azureml_train_automl_runtime-1.43.0-py3-none-any.whl (310 kB)
+INFO: pip is looking at multiple versions of azureml-train-automl-client to determine which version is compatible with other requirements. This could take a while.
+INFO: pip is looking at multiple versions of azureml-telemetry to determine which version is compatible with other requirements. This could take a while.
+INFO: pip is looking at multiple versions of azureml-dataset-runtime[fuse,pandas] to determine which version is compatible with other requirements. This could take a while.
+Collecting azureml-dataset-runtime[fuse,pandas]~=1.43.0
+  Downloading azureml_dataset_runtime-1.43.0.post1-py3-none-any.whl (2.3 kB)
+  Downloading azureml_dataset_runtime-1.43.0-py3-none-any.whl (2.2 kB)
+INFO: pip is looking at multiple versions of azureml-dataset-runtime to determine which version is compatible with other requirements. This could take a while.
+INFO: pip is looking at multiple versions of azureml-dataprep-rslex to determine which version is compatible with other requirements. This could take a while.
+Collecting azureml-dataprep-rslex~=2.6.0dev0
+  Downloading azureml_dataprep_rslex-2.6.2-cp36-cp36m-manylinux2010_x86_64.whl (15.5 MB)
+  Downloading azureml_dataprep_rslex-2.6.1-cp36-cp36m-manylinux1_x86_64.whl (15.5 MB)
+  Downloading azureml_dataprep_rslex-2.6.0-cp36-cp36m-manylinux1_x86_64.whl (15.5 MB)
+INFO: pip is looking at multiple versions of azureml-train-automl-client to determine which version is compatible with other requirements. This could take a while.
+INFO: pip is looking at multiple versions of azureml-telemetry to determine which version is compatible with other requirements. This could take a while.
+INFO: pip is looking at multiple versions of azureml-dataset-runtime[fuse,pandas] to determine which version is compatible with other requirements. This could take a while.
+INFO: pip is looking at multiple versions of azureml-dataprep-native to determine which version is compatible with other requirements. This could take a while.
+INFO: pip is looking at multiple versions of azure-identity to determine which version is compatible with other requirements. This could take a while.
+INFO: pip is looking at multiple versions of azureml-dataprep to determine which version is compatible with other requirements. This could take a while.
+Collecting azureml-dataprep<4.1.0a,>=4.0.0a
+  Downloading azureml_dataprep-4.0.3-py3-none-any.whl (43.4 MB)
+INFO: This is taking longer than usual. You might need to provide the dependency resolver with stricter constraints to reduce runtime. If you want to abort this run, you can press Ctrl + C to do so. To improve how pip performs, tell us what happened here: https://pip.pypa.io/surveys/backtracking
+INFO: This is taking longer than usual. You might need to provide the dependency resolver with stricter constraints to reduce runtime. If you want to abort this run, you can press Ctrl + C to do so. To improve how pip performs, tell us what happened here: https://pip.pypa.io/surveys/backtracking
+INFO: This is taking longer than usual. You might need to provide the dependency resolver with stricter constraints to reduce runtime. If you want to abort this run, you can press Ctrl + C to do so. To improve how pip performs, tell us what happened here: https://pip.pypa.io/surveys/backtracking
+INFO: pip is looking at multiple versions of azureml-dataset-runtime to determine which version is compatible with other requirements. This could take a while.
+INFO: pip is looking at multiple versions of azureml-dataprep-rslex to determine which version is compatible with other requirements. This could take a while.
+  Downloading azureml_dataprep-4.0.2-py3-none-any.whl (43.4 MB)
+  Downloading azureml_dataprep-4.0.1-py3-none-any.whl (43.4 MB)
+INFO: This is taking longer than usual. You might need to provide the dependency resolver with stricter constraints to reduce runtime. If you want to abort this run, you can press Ctrl + C to do so. To improve how pip performs, tell us what happened here: https://pip.pypa.io/surveys/backtracking
+INFO: This is taking longer than usual. You might need to provide the dependency resolver with stricter constraints to reduce runtime. If you want to abort this run, you can press Ctrl + C to do so. To improve how pip performs, tell us what happened here: https://pip.pypa.io/surveys/backtracking
+  Downloading azureml_dataprep-4.0.0-py3-none-any.whl (43.4 MB)
+INFO: pip is looking at multiple versions of azure-mgmt-storage to determine which version is compatible with other requirements. This could take a while.
+Collecting azure-mgmt-storage<=20.0.0,>=16.0.0
+  Downloading azure_mgmt_storage-19.1.0-py3-none-any.whl (1.8 MB)
+INFO: pip is looking at multiple versions of azureml-dataprep-native to determine which version is compatible with other requirements. This could take a while.
+INFO: pip is looking at multiple versions of azure-identity to determine which version is compatible with other requirements. This could take a while.
+INFO: pip is looking at multiple versions of azureml-dataprep to determine which version is compatible with other requirements. This could take a while.
+  Downloading azure_mgmt_storage-19.0.0-py2.py3-none-any.whl (1.8 MB)
+INFO: This is taking longer than usual. You might need to provide the dependency resolver with stricter constraints to reduce runtime. If you want to abort this run, you can press Ctrl + C to do so. To improve how pip performs, tell us what happened here: https://pip.pypa.io/surveys/backtracking
+INFO: This is taking longer than usual. You might need to provide the dependency resolver with stricter constraints to reduce runtime. If you want to abort this run, you can press Ctrl + C to do so. To improve how pip performs, tell us what happened here: https://pip.pypa.io/surveys/backtracking
+INFO: This is taking longer than usual. You might need to provide the dependency resolver with stricter constraints to reduce runtime. If you want to abort this run, you can press Ctrl + C to do so. To improve how pip performs, tell us what happened here: https://pip.pypa.io/surveys/backtracking
+  Downloading azure_mgmt_storage-18.0.0-py2.py3-none-any.whl (1.6 MB)
+  Downloading azure_mgmt_storage-17.1.0-py2.py3-none-any.whl (1.4 MB)
+  Downloading azure_mgmt_storage-17.0.0-py2.py3-none-any.whl (1.2 MB)
+  Downloading azure_mgmt_storage-16.0.0-py2.py3-none-any.whl (811 kB)
+INFO: pip is looking at multiple versions of azure-mgmt-resource to determine which version is compatible with other requirements. This could take a while.
+Collecting azure-mgmt-resource<22.0.0,>=15.0.0
+  Downloading azure_mgmt_resource-21.0.0-py3-none-any.whl (2.3 MB)
+INFO: pip is looking at multiple versions of azure-mgmt-storage to determine which version is compatible with other requirements. This could take a while.
+INFO: This is taking longer than usual. You might need to provide the dependency resolver with stricter constraints to reduce runtime. If you want to abort this run, you can press Ctrl + C to do so. To improve how pip performs, tell us what happened here: https://pip.pypa.io/surveys/backtracking
+  Downloading azure_mgmt_resource-20.1.0-py3-none-any.whl (2.3 MB)
+  Downloading azure_mgmt_resource-20.0.0-py2.py3-none-any.whl (2.3 MB)
+  Downloading azure_mgmt_resource-19.0.0-py2.py3-none-any.whl (2.2 MB)
+  Downloading azure_mgmt_resource-18.1.0-py2.py3-none-any.whl (2.2 MB)
+  Downloading azure_mgmt_resource-18.0.0-py2.py3-none-any.whl (2.2 MB)
+  Downloading azure_mgmt_resource-17.0.0-py2.py3-none-any.whl (2.2 MB)
+INFO: pip is looking at multiple versions of azure-mgmt-resource to determine which version is compatible with other requirements. This could take a while.
+  Downloading azure_mgmt_resource-16.1.0-py2.py3-none-any.whl (1.9 MB)
+  Downloading azure_mgmt_resource-16.0.0-py2.py3-none-any.whl (1.8 MB)
+  Downloading azure_mgmt_resource-15.0.0-py2.py3-none-any.whl (1.6 MB)
+INFO: pip is looking at multiple versions of azure-mgmt-keyvault to determine which version is compatible with other requirements. This could take a while.
+Collecting azure-mgmt-keyvault<11.0.0,>=0.40.0
+  Downloading azure_mgmt_keyvault-9.3.0-py2.py3-none-any.whl (412 kB)
+INFO: This is taking longer than usual. You might need to provide the dependency resolver with stricter constraints to reduce runtime. If you want to abort this run, you can press Ctrl + C to do so. To improve how pip performs, tell us what happened here: https://pip.pypa.io/surveys/backtracking
+  Downloading azure_mgmt_keyvault-9.2.0-py2.py3-none-any.whl (412 kB)
+  Downloading azure_mgmt_keyvault-9.1.0-py2.py3-none-any.whl (314 kB)
+  Downloading azure_mgmt_keyvault-9.0.0-py2.py3-none-any.whl (312 kB)
+  Downloading azure_mgmt_keyvault-8.0.0-py2.py3-none-any.whl (197 kB)
+  Downloading azure_mgmt_keyvault-7.0.0-py2.py3-none-any.whl (197 kB)
+  Downloading azure_mgmt_keyvault-2.2.0-py2.py3-none-any.whl (89 kB)
+INFO: pip is looking at multiple versions of azure-mgmt-keyvault to determine which version is compatible with other requirements. This could take a while.
+  Downloading azure_mgmt_keyvault-2.1.1-py2.py3-none-any.whl (117 kB)
+  Downloading azure_mgmt_keyvault-2.1.0-py2.py3-none-any.whl (117 kB)
+  Downloading azure_mgmt_keyvault-2.0.0-py2.py3-none-any.whl (80 kB)
+  Downloading azure_mgmt_keyvault-1.1.0-py2.py3-none-any.whl (111 kB)
+Collecting azure-mgmt-nspkg>=2.0.0
+  Downloading azure_mgmt_nspkg-3.0.2-py3-none-any.whl (1.6 kB)
+Collecting azure-nspkg>=3.0.0
+  Downloading azure_nspkg-3.0.2-py3-none-any.whl (1.5 kB)
+INFO: pip is looking at multiple versions of azure-nspkg to determine which version is compatible with other requirements. This could take a while.
+  Downloading azure_nspkg-3.0.1-py3-none-any.whl (1.5 kB)
+INFO: pip is looking at multiple versions of azure-nspkg to determine which version is compatible with other requirements. This could take a while.
+INFO: This is taking longer than usual. You might need to provide the dependency resolver with stricter constraints to reduce runtime. If you want to abort this run, you can press Ctrl + C to do so. To improve how pip performs, tell us what happened here: https://pip.pypa.io/surveys/backtracking
+INFO: pip is looking at multiple versions of azure-mgmt-nspkg to determine which version is compatible with other requirements. This could take a while.
+Collecting azure-mgmt-nspkg>=2.0.0
+  Downloading azure_mgmt_nspkg-3.0.1-py3-none-any.whl (1.6 kB)
+  Downloading azure_mgmt_nspkg-2.0.0-py2.py3-none-any.whl (2.8 kB)
+Collecting azure-nspkg>=2.0.0
+  Downloading azure_nspkg-2.0.0-py2.py3-none-any.whl (2.6 kB)
+Collecting azure-mgmt-keyvault<11.0.0,>=0.40.0
+  Downloading azure_mgmt_keyvault-1.0.0-py2.py3-none-any.whl (57 kB)
+INFO: This is taking longer than usual. You might need to provide the dependency resolver with stricter constraints to reduce runtime. If you want to abort this run, you can press Ctrl + C to do so. To improve how pip performs, tell us what happened here: https://pip.pypa.io/surveys/backtracking
+  Downloading azure_mgmt_keyvault-0.40.0-py2.py3-none-any.whl (21 kB)
+Collecting msrestazure<=0.6.4,>=0.4.33
+  Downloading msrestazure-0.4.34-py2.py3-none-any.whl (36 kB)
+INFO: pip is looking at multiple versions of azure-mgmt-nspkg to determine which version is compatible with other requirements. This could take a while.
+INFO: pip is looking at multiple versions of azure-mgmt-core to determine which version is compatible with other requirements. This could take a while.
+INFO: pip is looking at multiple versions of azure-mgmt-containerregistry to determine which version is compatible with other requirements. This could take a while.
+Collecting azure-mgmt-containerregistry<11,>=8.2.0
+  Downloading azure_mgmt_containerregistry-9.1.0-py3-none-any.whl (1.1 MB)
+INFO: This is taking longer than usual. You might need to provide the dependency resolver with stricter constraints to reduce runtime. If you want to abort this run, you can press Ctrl + C to do so. To improve how pip performs, tell us what happened here: https://pip.pypa.io/surveys/backtracking
+  Downloading azure_mgmt_containerregistry-9.0.0-py3-none-any.whl (937 kB)
+  Downloading azure_mgmt_containerregistry-8.2.0-py2.py3-none-any.whl (928 kB)
+
+failed
+
+
+==> WARNING: A newer version of conda exists. <==
+  current version: 4.9.2
+  latest version: 4.13.0
+
+Please update conda by running
+
+    $ conda update -n base -c defaults conda
+
+
+Pip subprocess error:
+WARNING: Retrying (Retry(total=4, connect=None, read=None, redirect=None, status=None)) after connection broken by 'ProtocolError('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))': /simple/azure-mgmt-nspkg/
+  WARNING: Retrying (Retry(total=4, connect=None, read=None, redirect=None, status=None)) after connection broken by 'ProtocolError('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))': /packages/1b/a6/1fdfefae6d367f9ef953ac380859d557a7e6abcd191897373f86b737cbaa/azure_mgmt_nspkg-3.0.1-py3-none-any.whl
+  WARNING: Retrying (Retry(total=4, connect=None, read=None, redirect=None, status=None)) after connection broken by 'ProtocolError('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))': /packages/c9/e3/48b98f929290b0cd0aaa4707ecabb8aaeb267e8ef628af907f1d1c506ec7/azure_mgmt_nspkg-2.0.0-py2.py3-none-any.whl
+  WARNING: Retrying (Retry(total=4, connect=None, read=None, redirect=None, status=None)) after connection broken by 'ProtocolError('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))': /packages/fa/a9/cb52f53824b15491ee0a9532c6003745edbb6643b8cd55e263942d8df73c/azure_mgmt_keyvault-1.0.0-py2.py3-none-any.whl
+  WARNING: Retrying (Retry(total=4, connect=None, read=None, redirect=None, status=None)) after connection broken by 'ProtocolError('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))': /packages/45/5a/f3182d7ed82173d9af0bd96d01de4002eca8fddbd3c1feb99d839c5f4657/azure_mgmt_keyvault-0.40.0-py2.py3-none-any.whl
+  WARNING: Retrying (Retry(total=4, connect=None, read=None, redirect=None, status=None)) after connection broken by 'ProtocolError('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))': /packages/a5/00/83a27f6e951bb2b4964c9991d964e78a06cb5295da38088e0be44d5fbe1e/azure_mgmt_containerregistry-9.1.0-py3-none-any.whl
+  WARNING: Retrying (Retry(total=4, connect=None, read=None, redirect=None, status=None)) after connection broken by 'ProtocolError('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))': /packages/94/29/aa6bc68d612c8012701de1daf61a61e913ed293296879d23094c6bca4768/azure_mgmt_containerregistry-9.0.0-py3-none-any.whl
+  WARNING: Retrying (Retry(total=4, connect=None, read=None, redirect=None, status=None)) after connection broken by 'ProtocolError('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))': /packages/4c/15/a20fe04b4e6d45a168e5aa6c60209fc51d9599325b89144c43c644de7510/azure_mgmt_containerregistry-8.2.0-py2.py3-none-any.whl
+ERROR: Exception:
+Traceback (most recent call last):
+  File "/opt/miniconda/envs/project_environment/lib/python3.6/site-packages/pip/_internal/cli/base_command.py", line 173, in _main
+    status = self.run(options, args)
+  File "/opt/miniconda/envs/project_environment/lib/python3.6/site-packages/pip/_internal/cli/req_command.py", line 203, in wrapper
+    return func(self, options, args)
+  File "/opt/miniconda/envs/project_environment/lib/python3.6/site-packages/pip/_internal/commands/install.py", line 316, in run
+    reqs, check_supported_wheels=not options.target_dir
+  File "/opt/miniconda/envs/project_environment/lib/python3.6/site-packages/pip/_internal/resolution/resolvelib/resolver.py", line 95, in resolve
+    collected.requirements, max_rounds=try_to_avoid_resolution_too_deep
+  File "/opt/miniconda/envs/project_environment/lib/python3.6/site-packages/pip/_vendor/resolvelib/resolvers.py", line 472, in resolve
+    state = resolution.resolve(requirements, max_rounds=max_rounds)
+  File "/opt/miniconda/envs/project_environment/lib/python3.6/site-packages/pip/_vendor/resolvelib/resolvers.py", line 383, in resolve
+    raise ResolutionTooDeep(max_rounds)
+pip._vendor.resolvelib.resolvers.ResolutionTooDeep: 2000000
+
+
+CondaEnvException: Pip failed
+
+The command '/bin/sh -c conda env create -f './conda_dependencies.yml'' returned a non-zero code: 1
