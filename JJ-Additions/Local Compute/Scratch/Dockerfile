@@ -36,9 +36,9 @@ RUN apt-get update -y && apt-get upgrade -y &&\
 RUN conda -V
 # RUN pip install azureml-train-automl 
 RUN pip install azureml.interpret azureml-dataset-runtime azureml.train azureml-train-automl jinja2 MarkupSafe raiwidgets python-dotenv pybridge 
-COPY './conda_dependencies.yml' .
+COPY './conda_dependencies.scratch.yml' .
 # RUN conda env create -f './conda_dependencies.yml'
-RUN export PIP_LOG="/tmp/pip_log.txt" && touch ${PIP_LOG} && tail -f ${PIP_LOG} & conda env create -f "./conda_dependencies.yml" && killall tail && rm ${PIP_LOG}
+RUN export PIP_LOG="/tmp/pip_log.txt" && touch ${PIP_LOG} && tail -f ${PIP_LOG} & conda env create -f "./conda_dependencies.scratch.yml" && killall tail && rm ${PIP_LOG}
 
 RUN echo "Hello from custom container!" > ~/hello.txt
 

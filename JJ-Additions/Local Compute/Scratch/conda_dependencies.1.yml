@@ -1,0 +1,19 @@
+name: project_environment
+dependencies:
+- python=3.6.2
+- pip:
+  - azureml.interpret
+  - azureml-dataset-runtime
+  - azureml.train
+  - azureml.train.automl
+  - jinja2
+  - MarkupSafe
+  - raiwidgets
+  - python-dotenv
+  - pybridge
+- pip
+- pyspark
+- scikit-learn
+channels:
+- anaconda
+- conda-forge
