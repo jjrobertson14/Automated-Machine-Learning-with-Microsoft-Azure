@@ -44,9 +44,10 @@ RUN echo "Hello from custom container!" > ~/hello.txt
 
 # d TODO try installing this stuff too, I really need to see an error message...
 # d TODO running the conda env create (RUN conda env create -f './conda_dependencies.yml')
-# TODO try installing ONLY 
-# TODO or maybe I can try removing entries from pip_packages in the Notebook
-# TODO pin the installed package versions
+# d TODO try installing ONLY 
+# can try removing entries from pip_packages in the Notebook
+#       TODO! pin the installed package versions once this works
+
 # TODO if can't get anything to work, drop Docker, try to use the conda environment local run instead of Docker.
 
 # conda_packages = ['pip',

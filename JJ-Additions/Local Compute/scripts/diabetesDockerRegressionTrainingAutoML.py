@@ -4,14 +4,12 @@ from azureml.core.run import Run
 import getopt
 import joblib
 import os
-import pickle
 import sys
 
 import pandas as pd
 import numpy as np
 
 #Importing the Decision Tree from scikit-learn library
-from sklearn.tree import DecisionTreeRegressor
 # Metrics for Evaluation of model: RSME and R2 for regression
 from sklearn.metrics  import mean_squared_error,r2_score
 
@@ -165,7 +163,6 @@ test_data = Dataset.get_by_name(ws, test_data_registered_name, version = 'latest
 
 # Use AutoML to generate models
 from azureml.train.automl import AutoMLConfig
-from azureml.widgets import RunDetails
 
 # Basic Variables for AutoMLConfig
 target_column = 'Y'
@@ -176,33 +173,30 @@ featurization = 'auto'
 # Define Compute Cluster to use
 compute_target = 'local'
 
+# TODO get experiment.submit() working with the autoMLConfig
+# Getting this error
+#      "ValueError: The truth value of a DataFrame is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().""
+#       Resolve by: 
+#           - Perhaps this link will help, it seems the error is a data format problem
+#                (https://docs.microsoft.com/en-us/azure/machine-learning/how-to-configure-auto-train#data-source-and-format)
+
+print(test_data)
+
+print(train_data)
+
 # AutoMLConfig
 autoMLConfig = AutoMLConfig(task=task,
                       primary_metric=primary_metric,
                       featurization=featurization,
                       compute_target=compute_target,
                       training_data=train_data,
-                      test_data=test_data,
                       label_column_name=target_column,
                       experiment_timeout_minutes=15,
                       enable_early_stopping=True,
                       n_cross_validations=5,
                       model_explainability=True)
+                      #   test_data=test_data,
 
-# TODO run autoML training from here
-#       - perhaps create a child run (Run.child_run to create a child run)
-#           - (https://docs.microsoft.com/en-us/python/api/azureml-core/azureml.core.run.run?view=azure-ml-py)
-#       - perhaps look up using ScriptRunConfig along with AutoMLConfig
-# TODO Get Best Model from the AutoML run
-experiment_name = 'Diabetes_Docker_Regression_Training_AutoML'
-experiment = Experiment(workspace=ws, name=experiment_name)
-AutoML_run = experiment.submit(autoMLConfig, show_output = True)
-RunDetails(AutoML_run).show()
-print("calling wait_for_completion on the AutoML_run")
-AutoML_run.wait_for_completion()
-# TODO stop "Exiting early"
-print("Exiting early")
-exit()
 
 # TODO replace with the following notation
 #    automl_settings = {
@@ -221,6 +215,21 @@ exit()
 #                                label_column_name = label,
 #                                **automl_settings
 #                                )
+
+# TODO run autoML training from here
+#       - perhaps create a child run (Run.child_run to create a child run)
+#           - (https://docs.microsoft.com/en-us/python/api/azureml-core/azureml.core.run.run?view=azure-ml-py)
+#       - perhaps look up using ScriptRunConfig along with AutoMLConfig
+# TODO Get Best Model from the AutoML run
+experiment_name = 'Diabetes_Docker_Regression_Training_AutoML'
+experiment = Experiment(workspace=ws, name=experiment_name)
+AutoML_run = experiment.submit(autoMLConfig, show_output = True)
+print("calling wait_for_completion on the AutoML_run")
+AutoML_run.wait_for_completion()
+# TODO stop "Exiting early"
+print("Exiting early")
+exit()
+
 
 # Training the model is as simple as this
 # We use the predict() on the model to predict the output
