@@ -1,0 +1,16 @@
+NOTE: experiment.submit() on AutoMLConfig Experiment call resulted in this.
+SIDE NOTE: Right before this got error message related to "test_data" property of the AutoMLConfig object, I removed the property from the AutoMLConfig object.
+
+
+Message: Install the required versions of packages using the requirements file. Requirements file location: /azureml-envs/azureml_3c7f3be3926d98bc077c0486c6b41227/lib/python3.6/site-packages/azureml/automl/core/validated_linux_requirements.txt. Alternatively, use remote target to avoid dependency management. 
+Required version/Installed version
+azure-core<=1.24.1/azure-core 1.24.2
+azure-storage-queue<=12.3.0/azure-storage-queue 12.4.0
+cffi<=1.15.0/cffi 1.15.1
+cryptography<=37.0.3/cryptography 37.0.4
+dataclasses<=0.6/dataclasses 0.8
+google-auth<=2.8.0/google-auth 2.9.1
+opencensus<=0.9.0/opencensus 0.10.0
+opencensus-ext-azure<=1.1.4/opencensus-ext-azure 1.1.5
+portalocker<=2.4.0/portalocker 2.5.1
+toolz<=0.11.2/toolz 0.12.0
