@@ -22,9 +22,9 @@ from azureml.train.automl import AutoMLConfig
 from azureml.core.authentication import ServicePrincipalAuthentication
 
 import pkg_resources
+print("(azureml.core.authentication is from this) azureml-core==", pkg_resources.get_distribution('azureml-core').version)
 print("azureml-train-automl==", pkg_resources.get_distribution('azureml-train-automl').version)
 print("azureml-interpret==", pkg_resources.get_distribution('azureml-interpret').version)
-print("azureml.core.authentication==", pkg_resources.get_distribution('azureml.core.authentication').version)
 print("python-dotenv==", pkg_resources.get_distribution('python-dotenv').version)
 print("interpret-community==", pkg_resources.get_distribution('interpret-community').version)
 print("interpret-core==", pkg_resources.get_distribution('interpret-core').version)
