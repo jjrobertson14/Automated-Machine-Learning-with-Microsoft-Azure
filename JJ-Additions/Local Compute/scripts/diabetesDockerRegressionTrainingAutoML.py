@@ -13,8 +13,25 @@ import numpy as np
 # Metrics for Evaluation of model: RSME and R2 for regression
 from sklearn.metrics  import mean_squared_error,r2_score
 
-# Print info about the local environment
+# Import the rest
+from interpret.ext.blackbox import TabularExplainer
+from azureml.interpret import ExplanationClient
 import subprocess
+from dotenv import load_dotenv
+from azureml.train.automl import AutoMLConfig
+from azureml.core.authentication import ServicePrincipalAuthentication
+
+import pkg_resources
+print(pkg_resources.get_distribution('azureml.train.automl').version)
+print(pkg_resources.get_distribution('azureml.interpret').version)
+print(pkg_resources.get_distribution('python-dotenv').version)
+print(pkg_resources.get_distribution('interpret.ext.blackbox').version)
+print(pkg_resources.get_distribution('subprocess').version)
+print(pkg_resources.get_distribution('azureml.core.authentication').version)
+print(pkg_resources.get_distribution('azureml.train.automl').version)
+
+# Print info about the local environment
+# import subprocess
 print("output of pwd: ", subprocess.check_output("pwd", shell=True).decode('ascii'))
 print("output of ls -altr .: ", subprocess.check_output("ls -altr", shell=True).decode('ascii'))
 print("output of ls -altr ./resources: ", subprocess.check_output("ls -altr ./resources", shell=True).decode('ascii'))
@@ -117,14 +134,14 @@ ws_name = p_ws_name
 subscription_id = p_subscription_id
 resource_group = p_resource_group
 # Get credentials for authentication 
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 load_dotenv('./resources/custom_env_vars_for_script_inside_docker_container')
 # Authenticate with the Service Principal in order to get the Workspace object
 #   (this is a workaround for interactive authentication ocurring within headless Docker container)
 #   (you can find tenant id under azure active directory->properties)
 #   (you can find clientId in the Service Principal's page in the Azure portal)
 #   (you can find clientSecret in the Service Principal's page in the Azure portal)
-from azureml.core.authentication import ServicePrincipalAuthentication
+# from azureml.core.authentication import ServicePrincipalAuthentication
 sp = ServicePrincipalAuthentication(tenant_id=p_tenant_id,
                                     service_principal_id=os.environ["AML_PRINCIPAL_ID"], # clientId of service principal
                                     service_principal_password=os.environ["AML_PRINCIPAL_PASS"]) # clientSecret of service principal
@@ -162,7 +179,7 @@ train_data = Dataset.get_by_name(ws, train_data_registered_name, version = 'late
 test_data = Dataset.get_by_name(ws, test_data_registered_name, version = 'latest').to_pandas_dataframe()
 
 # Use AutoML to generate models
-from azureml.train.automl import AutoMLConfig
+# from azureml.train.automl import AutoMLConfig
 
 # Basic Variables for AutoMLConfig
 target_column = 'Y'
@@ -264,8 +281,8 @@ file.close()
 
 
 # BEGIN Add Explanations (In terms of engineered features)
-from interpret.ext.blackbox import TabularExplainer
-from azureml.interpret import ExplanationClient
+# from interpret.ext.blackbox import TabularExplainer
+# from azureml.interpret import ExplanationClient
 client = ExplanationClient.from_run(run)
 
 # TODO get explanations working by giving model to the explainer
@@ -275,7 +292,7 @@ bestModel = "blah"
 # Explain in terms of engineered features
 # NOTE: regressor_pipeline.steps[-1][1] contains the Model
 # NOTE: "features" field is optional for TabularExplainers
-from interpret.ext.blackbox import TabularExplainer
+# from interpret.ext.blackbox import TabularExplainer
 engineered_explainer = TabularExplainer(bestModel,
                                      initialization_examples=X_test,
                                      features=p_feature_names)
