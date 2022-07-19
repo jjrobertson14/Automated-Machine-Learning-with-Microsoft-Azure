@@ -3,15 +3,18 @@ dependencies:
 - python=3.6.2
 - pip:
   - azure-core==1.24.1
-  - azure-storage-queue==12.3.0,
-  - cffi==1.15.0,
-  - cryptography==37.0.3,
-  - dataclasses==0.6,
-  - google-auth==2.8.0,
-  - opencensus==0.9.0,
-  - opencensus-ext-azure==1.1.4,
-  - portalocker==2.4.0,
+  - azure-storage-queue==12.3.0
+  - cffi==1.15.0
+  - cryptography==37.0.3
+  - dataclasses==0.6
+  - google-auth==2.8.0
+  - opencensus==0.9.0
+  - opencensus-ext-azure==1.1.4
+  - portalocker==2.4.0
   - toolz==0.11.2
+  - azureml.train.automl
+  - azureml.interpret
+  - python-dotenv
 - pip
 channels:
 - anaconda
