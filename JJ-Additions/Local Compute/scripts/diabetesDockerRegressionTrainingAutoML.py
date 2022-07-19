@@ -22,13 +22,12 @@ from azureml.train.automl import AutoMLConfig
 from azureml.core.authentication import ServicePrincipalAuthentication
 
 import pkg_resources
-print(pkg_resources.get_distribution('azureml-train-automl').version)
-print(pkg_resources.get_distribution('azureml-interpret').version)
-print(pkg_resources.get_distribution('python-dotenv').version)
-print(pkg_resources.get_distribution('interpret-community').version)
-print(pkg_resources.get_distribution('interpret-core').version)
-print(pkg_resources.get_distribution('subprocess').version)
-print(pkg_resources.get_distribution('azureml.core.authentication').version)
+print("azureml-train-automl==", pkg_resources.get_distribution('azureml-train-automl').version)
+print("azureml-interpret==", pkg_resources.get_distribution('azureml-interpret').version)
+print("azureml.core.authentication==", pkg_resources.get_distribution('azureml.core.authentication').version)
+print("python-dotenv==", pkg_resources.get_distribution('python-dotenv').version)
+print("interpret-community==", pkg_resources.get_distribution('interpret-community').version)
+print("interpret-core==", pkg_resources.get_distribution('interpret-core').version)
 
 # Print info about the local environment
 # import subprocess
