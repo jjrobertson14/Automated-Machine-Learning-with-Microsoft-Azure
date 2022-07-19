@@ -22,13 +22,13 @@ from azureml.train.automl import AutoMLConfig
 from azureml.core.authentication import ServicePrincipalAuthentication
 
 import pkg_resources
-print(pkg_resources.get_distribution('azureml.train.automl').version)
-print(pkg_resources.get_distribution('azureml.interpret').version)
+print(pkg_resources.get_distribution('azureml-train-automl').version)
+print(pkg_resources.get_distribution('azureml-interpret').version)
 print(pkg_resources.get_distribution('python-dotenv').version)
-print(pkg_resources.get_distribution('interpret.ext.blackbox').version)
+print(pkg_resources.get_distribution('interpret-community').version)
+print(pkg_resources.get_distribution('interpret-core').version)
 print(pkg_resources.get_distribution('subprocess').version)
 print(pkg_resources.get_distribution('azureml.core.authentication').version)
-print(pkg_resources.get_distribution('azureml.train.automl').version)
 
 # Print info about the local environment
 # import subprocess
@@ -233,17 +233,18 @@ autoMLConfig = AutoMLConfig(task=task,
 #                                **automl_settings
 #                                )
 
-# TODO run autoML training from here
+# Run autoML training from here
 #       - perhaps create a child run (Run.child_run to create a child run)
 #           - (https://docs.microsoft.com/en-us/python/api/azureml-core/azureml.core.run.run?view=azure-ml-py)
 #       - perhaps look up using ScriptRunConfig along with AutoMLConfig
-# TODO Get Best Model from the AutoML run
+# Get Best Model from the AutoML run
 experiment_name = 'Diabetes_Docker_Regression_Training_AutoML'
 experiment = Experiment(workspace=ws, name=experiment_name)
 AutoML_run = experiment.submit(autoMLConfig, show_output = True)
 print("calling wait_for_completion on the AutoML_run")
 AutoML_run.wait_for_completion()
 # TODO stop "Exiting early"
+# TODO make sure rest of script works
 print("Exiting early")
 exit()
 
