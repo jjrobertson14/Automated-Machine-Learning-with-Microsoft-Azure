@@ -242,12 +242,15 @@ print("calling wait_for_completion on the AutoML_run")
 AutoML_run.wait_for_completion()
 
 # TODO Get the best model
-bestModel = AutoML_run.get_output()
+bestRunAndModel = AutoML_run.get_output()
+print(bestRunAndModel[0])
+print(bestRunAndModel[1])
+bestModel = bestRunAndModel[1]
 print(bestModel)
 
 # Training the model is as simple as this
 # We use the predict() on the model to predict the output
-prediction = bestModel.predict(X_test)
+prediction = bestModel[1].predict(X_test)
 
 # Log regression metrics to evaluate the model with, using R2 score and RSME score for Regression here
 r2 = r2_score(y_test, prediction)
