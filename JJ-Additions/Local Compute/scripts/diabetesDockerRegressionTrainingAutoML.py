@@ -247,6 +247,8 @@ AutoML_run.wait_for_completion()
 print("Exiting early")
 exit()
 
+# TODO Set best model
+bestModel = "blah"
 
 # Training the model is as simple as this
 # We use the predict() on the model to predict the output
@@ -288,7 +290,6 @@ client = ExplanationClient.from_run(run)
 # TODO get explanations working by giving model to the explainer
 # BEGIN Add Engineered Feature Explanations
 # Fit the model
-bestModel = "blah"
 # Explain in terms of engineered features
 # NOTE: regressor_pipeline.steps[-1][1] contains the Model
 # NOTE: "features" field is optional for TabularExplainers

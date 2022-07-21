@@ -12,9 +12,10 @@ dependencies:
   - opencensus-ext-azure==1.1.4
   - portalocker==2.4.0
   - toolz==0.11.2
-  - azureml.train.automl
-  - azureml.interpret
-  - python-dotenv
+  - azureml.train.automl==1.43.0
+  - azureml.interpret==1.43.0
+  - python-dotenv==0.20.0
+  - rsa==4.8
 - pip
 channels:
 - anaconda
