@@ -189,7 +189,6 @@ featurization = 'auto'
 # Define Compute Cluster to use
 compute_target = 'local'
 
-# TODO get experiment.submit() working with the autoMLConfig
 # Getting this error
 #      "ValueError: The truth value of a DataFrame is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().""
 #       Resolve by: 
@@ -232,23 +231,19 @@ autoMLConfig = AutoMLConfig(task=task,
 #                                **automl_settings
 #                                )
 
-# Run autoML training from here
+# Run AutoML training from here
 #       - perhaps create a child run (Run.child_run to create a child run)
 #           - (https://docs.microsoft.com/en-us/python/api/azureml-core/azureml.core.run.run?view=azure-ml-py)
 #       - perhaps look up using ScriptRunConfig along with AutoMLConfig
-# Get Best Model from the AutoML run
 experiment_name = 'Diabetes_Docker_Regression_Training_AutoML'
 experiment = Experiment(workspace=ws, name=experiment_name)
 AutoML_run = experiment.submit(autoMLConfig, show_output = True)
 print("calling wait_for_completion on the AutoML_run")
 AutoML_run.wait_for_completion()
-# TODO stop "Exiting early"
-# TODO make sure rest of script works
-print("Exiting early")
-exit()
 
-# TODO Set best model
-bestModel = "blah"
+# TODO Get the best model
+bestModel = AutoML_run.get_output()
+print(bestModel)
 
 # Training the model is as simple as this
 # We use the predict() on the model to predict the output
