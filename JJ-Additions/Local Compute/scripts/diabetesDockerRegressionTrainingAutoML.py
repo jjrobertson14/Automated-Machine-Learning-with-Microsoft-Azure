@@ -241,7 +241,7 @@ AutoML_run = experiment.submit(autoMLConfig, show_output = True)
 print("calling wait_for_completion on the AutoML_run")
 AutoML_run.wait_for_completion()
 
-# TODO Get the best model
+# Get the best model
 bestRunAndModel = AutoML_run.get_output()
 print(bestRunAndModel[0])
 print(bestRunAndModel[1])
@@ -285,7 +285,7 @@ file.close()
 # from azureml.interpret import ExplanationClient
 client = ExplanationClient.from_run(run)
 
-# TODO get explanations working by giving model to the explainer
+# TODO (resolve error on instantiating the Explainer) get explanations working by giving best Model to the Explainer
 # BEGIN Add Engineered Feature Explanations
 # Fit the model
 # Explain in terms of engineered features
