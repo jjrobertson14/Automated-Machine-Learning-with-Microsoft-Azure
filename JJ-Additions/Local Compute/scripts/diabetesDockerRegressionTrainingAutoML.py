@@ -5,6 +5,7 @@ import getopt
 import joblib
 import os
 import sys
+import logging
 
 import pandas as pd
 import numpy as np
@@ -195,41 +196,28 @@ compute_target = 'local'
 #           - Perhaps this link will help, it seems the error is a data format problem
 #                (https://docs.microsoft.com/en-us/azure/machine-learning/how-to-configure-auto-train#data-source-and-format)
 
-print(test_data)
+print("Printing test_data: ", test_data)
 
-print(train_data)
+print("Printing train_data: ", train_data)
 
 # AutoMLConfig
+automl_settings = {
+    "featurization":featurization,
+    "experiment_timeout_minutes":15,
+    "enable_early_stopping":True,
+    "n_cross_validations":5,
+    "model_explainability":True,
+    "max_concurrent_iterations": 4,
+    "max_cores_per_iteration": -1,
+    "verbosity": logging.INFO,
+}
 autoMLConfig = AutoMLConfig(task=task,
-                      primary_metric=primary_metric,
-                      featurization=featurization,
                       compute_target=compute_target,
                       training_data=train_data,
                       label_column_name=target_column,
-                      experiment_timeout_minutes=15,
-                      enable_early_stopping=True,
-                      n_cross_validations=5,
-                      model_explainability=True)
-                      #   test_data=test_data,
+                      primary_metric=primary_metric,
+                      **automl_settings)
 
-
-# TODO replace with the following notation
-#    automl_settings = {
-#        "n_cross_validations": 3,
-#        "primary_metric": 'r2_score',
-#        "enable_early_stopping": True,
-#        "experiment_timeout_hours": 1.0,
-#        "max_concurrent_iterations": 4,
-#        "max_cores_per_iteration": -1,
-#        "verbosity": logging.INFO,
-#    }
-
-#    autoMLConfig = AutoMLConfig(task = 'regression',
-#                                compute_target = compute_target,
-#                                training_data = train_data,
-#                                label_column_name = label,
-#                                **automl_settings
-#                                )
 
 # Run AutoML training from here
 #       - perhaps create a child run (Run.child_run to create a child run)
@@ -245,8 +233,7 @@ AutoML_run.wait_for_completion()
 bestRunAndModel = AutoML_run.get_output()
 print("Printing bestRunAndModel[0]: ", bestRunAndModel[0])
 print("Printing bestRunAndModel[1]: ", bestRunAndModel[1])
-# NOTE: regressor_pipeline.steps[-1][1] contains the Model
-bestModel = bestRunAndModel[1].steps[-1][1]
+bestModel = bestRunAndModel[1]
 print("Printing bestModel:", bestModel)
 
 # Training the model is as simple as this
@@ -272,46 +259,9 @@ run.log('rsme', rsme)
 # print(r2_score(y_test,prediction))
 
 
+# TODO? Somehow get the best model downloaded to access in the Notebook (which runs in the local WSL environment)
 # Save the output model to a file...
 # ... This is required for the model to get automatically uploaded by the Notebook using this script
 with open(p_out_model_file_name, "wb") as file:
     joblib.dump(value=bestModel, filename=os.path.join('./outputs/', p_out_model_file_name))
 file.close()
-
-
-
-
-# BEGIN Add Explanations (In terms of engineered features)
-# from interpret.ext.blackbox import TabularExplainer
-# from azureml.interpret import ExplanationClient
-client = ExplanationClient.from_run(run)
-
-# TODO (resolve error on instantiating the Explainer) get explanations working by giving best Model to the Explainer
-# BEGIN Add Engineered Feature Explanations
-# Fit the model
-# Explain in terms of engineered features
-# NOTE: regressor_pipeline.steps[-1][1] contains the Model
-# NOTE: "features" field is optional for TabularExplainers
-# from interpret.ext.blackbox import TabularExplainer
-engineered_explainer = TabularExplainer(bestModel,
-                                     initialization_examples=X_test,
-                                     features=p_feature_names)
-# Explain results with this Explainer and upload the Explanation...
-
-# Get Global Explanations of raw features, global as in 'of total data'...
-# You can use the training data or the test data here, but test data would allow you to use Explanation Exploration
-# print("X_test, line value before engineered_explainer.explain_global: \n" + str(X_test))
-global_explanation = engineered_explainer.explain_global(X_test, y_test)
-# If you used the PFIExplainer in the previous step, use the next line of code instead
-# global_explanation = engineered_explainer.explain_global(X_test, true_labels=y_test)
-# Sorted feature importance values and feature names
-sorted_global_importance_values = global_explanation.get_ranked_global_values()
-sorted_global_importance_names = global_explanation.get_ranked_global_names()
-globalFeatureExplanations = dict(zip(sorted_global_importance_names, sorted_global_importance_values))
-print('globalFeatureExplanations: ', globalFeatureExplanations)
-# Alternatively, you can print out a dictionary that holds the top K feature names and values
-print('global_explanation.get_feature_importance_dict(): ', global_explanation.get_feature_importance_dict())
-
-# Upload the explanation in terms of engineered features
-client = ExplanationClient.from_run(run)
-client.upload_model_explanation(global_explanation, true_ys=y_test.values.ravel(), comment='global explanation: test dataset features, engineered')
