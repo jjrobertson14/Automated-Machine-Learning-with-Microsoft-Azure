@@ -11,8 +11,10 @@ import pandas as pd
 import numpy as np
 
 #Importing the Decision Tree from scikit-learn library
+# Metrics for Evaluation of model Accuracy and F1-score, for classification
+from sklearn.metrics  import f1_score,accuracy_score
 # Metrics for Evaluation of model: RSME and R2 for regression
-from sklearn.metrics  import mean_squared_error,r2_score
+# from sklearn.metrics  import mean_squared_error,r2_score
 
 # Import the rest
 import subprocess
@@ -238,13 +240,25 @@ print("Printing bestModel:", bestModel)
 # We use the predict() on the model to predict the output
 prediction = bestModel.predict(X_test)
 
+# Log classification metrics to evaluate the model with, using accuracy and F1 score for Classification here
+accuracy = accuracy_score(y_test, prediction)
+f1 = f1_score(y_test, prediction)
+print("accuracy: ", accuracy)
+print("f1: ", f1)
+run.log('accuracy', accuracy)
+run.log('f1', f1)
+
+# for regression...
 # Log regression metrics to evaluate the model with, using R2 score and RSME score for Regression here
-r2 = r2_score(y_test, prediction)
-rsme = mean_squared_error(y_test, prediction)
-print("r2: ", r2)
-print("rsme: ", rsme)
-run.log('r2', r2)
-run.log('rsme', rsme)
+# from sklearn.metrics import mean_squared_error
+# from sklearn.metrics import r2_score
+# r2 = r2_score(y_test, prediction)
+# rsme = mean_squared_error(y_test, prediction)
+# print("r2: ", r2)
+# print("rsme: ", rsme)
+# run.log('r2', r2)
+# run.log('rsme', rsme)
+
 
 # TODO? Somehow get the best model downloaded to access in the Notebook (which runs in the local WSL environment)
 # Save the output model to a file...
