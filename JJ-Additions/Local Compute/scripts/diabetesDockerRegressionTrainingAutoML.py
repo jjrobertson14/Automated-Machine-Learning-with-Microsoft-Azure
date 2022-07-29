@@ -218,9 +218,6 @@ autoMLConfig = AutoMLConfig(task=task,
 
 
 # Run AutoML training from here
-#       - perhaps create a child run (Run.child_run to create a child run)
-#           - (https://docs.microsoft.com/en-us/python/api/azureml-core/azureml.core.run.run?view=azure-ml-py)
-#       - perhaps look up using ScriptRunConfig along with AutoMLConfig
 experiment_name = 'Diabetes_Docker_Regression_Training_AutoML'
 experiment = Experiment(workspace=ws, name=experiment_name)
 AutoML_run = experiment.submit(autoMLConfig, show_output = True)

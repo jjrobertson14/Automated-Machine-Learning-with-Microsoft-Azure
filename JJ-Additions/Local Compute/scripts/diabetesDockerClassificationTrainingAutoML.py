@@ -50,7 +50,8 @@ long_options = [
     'out-model-file-name=',
     'numeric-feature-names=',
     'categoric-feature-names=',
-    'x-train-test-y-train-test-combined-train-test='
+    'x-train-test-y-train-test-combined-train-test=',
+    'num_classes='
 ]
 opts, args = getopt.getopt(argv, None, long_options)
 # except:
@@ -116,6 +117,8 @@ for opt, arg in opts:
         y_test_registered_name = xTrainTestYTrainTestCombinedTrainTest[3]
         train_data_registered_name = xTrainTestYTrainTestCombinedTrainTest[4]
         test_data_registered_name = xTrainTestYTrainTestCombinedTrainTest[5]
+    elif opt == '--num_classes':
+        p_num_classes = arg
     else:
         print("Unrecognized option passed, continuing run, it is: " + opt)
 
@@ -182,9 +185,9 @@ test_data = Dataset.get_by_name(ws, test_data_registered_name, version = 'latest
 # from azureml.train.automl import AutoMLConfig
 
 # Basic Variables for AutoMLConfig
-target_column = 'Y'
-task = 'regression'
-primary_metric = 'normalized_root_mean_squared_error'
+target_column = 'YThresholdMet'
+task = 'classification'
+primary_metric = 'accuracy'
 featurization = 'auto'
 
 # Define Compute Cluster to use
@@ -216,14 +219,12 @@ autoMLConfig = AutoMLConfig(task=task,
                       training_data=train_data,
                       label_column_name=target_column,
                       primary_metric=primary_metric,
+                      num_classes=p_num_classes,
                       **automl_settings)
 
 
 # Run AutoML training from here
-#       - perhaps create a child run (Run.child_run to create a child run)
-#           - (https://docs.microsoft.com/en-us/python/api/azureml-core/azureml.core.run.run?view=azure-ml-py)
-#       - perhaps look up using ScriptRunConfig along with AutoMLConfig
-experiment_name = 'Diabetes_Docker_Regression_Training_AutoML'
+experiment_name = 'Diabetes_Docker_Classification_Classified_By_Threshold_Reached_Training_AutoML'
 experiment = Experiment(workspace=ws, name=experiment_name)
 AutoML_run = experiment.submit(autoMLConfig, show_output = True)
 print("calling wait_for_completion on the AutoML_run")
