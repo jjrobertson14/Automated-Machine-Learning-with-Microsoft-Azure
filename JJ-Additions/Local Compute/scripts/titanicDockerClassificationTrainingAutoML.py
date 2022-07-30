@@ -51,7 +51,8 @@ long_options = [
     'numeric-feature-names=',
     'categoric-feature-names=',
     'x-train-test-y-train-test-combined-train-test=',
-    'num_classes='
+    'num_classes=',
+    'weight_column_name='
 ]
 opts, args = getopt.getopt(argv, None, long_options)
 # except:
@@ -119,6 +120,8 @@ for opt, arg in opts:
         test_data_registered_name = xTrainTestYTrainTestCombinedTrainTest[5]
     elif opt == '--num_classes':
         p_num_classes = arg
+    elif opt == '--weight_column_name':
+        p_weight_column_name = arg
     else:
         print("Unrecognized option passed, continuing run, it is this: " + opt)
 
@@ -184,12 +187,6 @@ test_data = Dataset.get_by_name(ws, test_data_registered_name, version = 'latest
 # Use AutoML to generate models
 # from azureml.train.automl import AutoMLConfig
 
-# Basic Variables for AutoMLConfig
-target_column = 'Survived'
-task = 'classification'
-primary_metric = 'accuracy'
-featurization = 'auto'
-
 # Define Compute Cluster to use
 compute_target = 'local'
 
@@ -203,23 +200,25 @@ print("Printing test_data: ", test_data)
 
 print("Printing train_data: ", train_data)
 
-# AutoMLConfig
+# AutoMLConfig for properties that may change value for optimization and configuration purposes
 automl_settings = {
-    "featurization":featurization,
+    "primary_metric":'accuracy',
+    "featurization":'auto',
     "experiment_timeout_minutes":15,
     "enable_early_stopping":True,
     "n_cross_validations":5,
     "model_explainability":True,
-    "max_concurrent_iterations": 4,
+    "max_concurrent_iterations": 8,
     "max_cores_per_iteration": -1,
     "verbosity": logging.INFO,
 }
-autoMLConfig = AutoMLConfig(task=task,
+# Leave the more or less unchanging properties as non kwargs
+autoMLConfig = AutoMLConfig(task='classification',
                       compute_target=compute_target,
                       training_data=train_data,
-                      label_column_name=target_column,
-                      primary_metric=primary_metric,
+                      label_column_name='Survived',
                       num_classes=p_num_classes,
+                      weight_column_name=p_weight_column_name,
                       **automl_settings)
 
 
