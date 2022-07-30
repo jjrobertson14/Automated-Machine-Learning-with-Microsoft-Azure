@@ -101,7 +101,7 @@ for opt, arg in opts:
         y_train_registered_name = xTrainTestYTrainTest[2]
         y_test_registered_name = xTrainTestYTrainTest[3]
     else:
-        print("Unrecognized option passed, continuing run, it is: " + opt)
+        print("Unrecognized option passed, continuing run, it is this: " + opt)
 
 p_feature_names = [*p_numeric_feature_names, *p_categoric_feature_names]
 print('p_feature_names was set with value: ', p_feature_names)
@@ -144,7 +144,7 @@ sep='\n')
 run = Run.get_context()
 run.log(name='creating outputs and logs directory...', value=0)
 run.log(os.makedirs('./outputs', exist_ok=True), value=0)
-run.log(os.makedirs('./outputs', exist_ok=True), value=0)
+run.log(os.makedirs('./logs', exist_ok=True), value=0)
 
 # BEGIN Get Data
 # Create datastore, try getting datastore via Workspace object
@@ -197,14 +197,18 @@ run.log('accuracy', accuracy)
 run.log('f1', f1)
 
 # for regression...
-#
-# we use R2 score and MAE(mean absolute error)
-# all other steps will be same as classification as shown above
 # 
-# from sklearn.metrics import mean_absolute_error
-# from sklearn.metrics import r2_score
-# print(mean_absolute_error(y_test,prediction))
-# print(r2_score(y_test,prediction))
+# Log regression metrics to evaluate the model with, using R2 score, MSE score, and MAE score for Regression here
+# from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
+# r2 = r2_score(y_test, prediction)
+# mse = mean_squared_error(y_test, prediction)
+# mae = mean_absolute_error(y_test, prediction)
+# print("r2: ", r2)
+# print("mse: ", mse)
+# print("mae: ", mae)
+# run.log('r2', r2)
+# run.log('mse', mse)
+# run.log('mae', ,mae)
 
 
 # Save the output model to a file...

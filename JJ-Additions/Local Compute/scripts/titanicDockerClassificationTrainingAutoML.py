@@ -120,7 +120,7 @@ for opt, arg in opts:
     elif opt == '--num_classes':
         p_num_classes = arg
     else:
-        print("Unrecognized option passed, continuing run, it is: " + opt)
+        print("Unrecognized option passed, continuing run, it is this: " + opt)
 
 p_feature_names = [*p_numeric_feature_names, *p_categoric_feature_names]
 print('p_feature_names was set with value: ', p_feature_names)
@@ -185,7 +185,7 @@ test_data = Dataset.get_by_name(ws, test_data_registered_name, version = 'latest
 # from azureml.train.automl import AutoMLConfig
 
 # Basic Variables for AutoMLConfig
-target_column = 'YThresholdMet'
+target_column = 'Survived'
 task = 'classification'
 primary_metric = 'accuracy'
 featurization = 'auto'
@@ -193,7 +193,7 @@ featurization = 'auto'
 # Define Compute Cluster to use
 compute_target = 'local'
 
-# Getting this error
+# Have gotten this error before...
 #      "ValueError: The truth value of a DataFrame is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().""
 #       Resolve by: 
 #           - Perhaps this link will help, it seems the error is a data format problem
@@ -224,7 +224,7 @@ autoMLConfig = AutoMLConfig(task=task,
 
 
 # Run AutoML training from here
-experiment_name = 'Diabetes_Docker_Classification_Classified_By_Threshold_Reached_Training_AutoML'
+experiment_name = 'Titanic_Docker_Classification_Training_AutoML'
 experiment = Experiment(workspace=ws, name=experiment_name)
 AutoML_run = experiment.submit(autoMLConfig, show_output = True)
 print("calling wait_for_completion on the AutoML_run")
@@ -250,15 +250,18 @@ run.log('accuracy', accuracy)
 run.log('f1', f1)
 
 # for regression...
-# Log regression metrics to evaluate the model with, using R2 score and RSME score for Regression here
-# from sklearn.metrics import mean_squared_error
-# from sklearn.metrics import r2_score
+# 
+# Log regression metrics to evaluate the model with, using R2 score, MSE score, and MAE score for Regression here
+# from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
 # r2 = r2_score(y_test, prediction)
-# rsme = mean_squared_error(y_test, prediction)
+# mse = mean_squared_error(y_test, prediction)
+# mae = mean_absolute_error(y_test, prediction)
 # print("r2: ", r2)
-# print("rsme: ", rsme)
+# print("mse: ", mse)
+# print("mae: ", mae)
 # run.log('r2', r2)
-# run.log('rsme', rsme)
+# run.log('mse', mse)
+# run.log('mae', ,mae)
 
 
 # TODO? Somehow get the best model downloaded to access in the Notebook (which runs in the local WSL environment)
