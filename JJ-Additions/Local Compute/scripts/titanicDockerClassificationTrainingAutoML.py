@@ -177,6 +177,7 @@ datastore = Datastore.get(ws, p_datastore_name)
 # (having registered them already in Notebook code)
 # X_train = Dataset.get_by_name(ws, X_train_registered_name, version = 'latest').to_pandas_dataframe()
 X_test  = Dataset.get_by_name(ws, X_test_registered_name, version = 'latest').to_pandas_dataframe()
+X_test_dropped_weight_column = X_test.drop([p_weight_column_name], axis=1)
 # y_train = Dataset.get_by_name(ws, y_train_registered_name, version = 'latest').to_pandas_dataframe()
 y_test = Dataset.get_by_name(ws, y_test_registered_name, version = 'latest').to_pandas_dataframe()
 
@@ -238,7 +239,8 @@ print("Printing bestModel:", bestModel)
 
 # Training the model is as simple as this
 # We use the predict() on the model to predict the output
-prediction = bestModel.predict(X_test)
+# TODO! FIX ERROR HERE, REMOVE THE weight_column
+prediction = bestModel.predict(X_test_dropped_weight_column)
 
 # Log classification metrics to evaluate the model with, using accuracy and F1 score for Classification here
 accuracy = accuracy_score(y_test, prediction)
