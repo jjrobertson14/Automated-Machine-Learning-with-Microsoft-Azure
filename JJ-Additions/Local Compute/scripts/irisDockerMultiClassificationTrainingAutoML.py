@@ -52,7 +52,8 @@ long_options = [
     'categoric-feature-names=',
     'x-train-test-y-train-test-combined-train-test=',
     'num_classes=',
-    'weight_column_name='
+    'weight_column_name=',
+    'automlconfig_experiment_name='
 ]
 opts, args = getopt.getopt(argv, None, long_options)
 # except:
@@ -122,6 +123,8 @@ for opt, arg in opts:
         p_num_classes = arg
     elif opt == '--weight_column_name':
         p_weight_column_name = arg
+    elif opt == '--automlconfig_experiment_name':
+        p_automlconfig_experiment_name = arg
     else:
         print("Unrecognized option passed, continuing run, it is this: " + opt)
 
@@ -173,11 +176,14 @@ run.log(os.makedirs('./logs', exist_ok=True), value=0)
 datastore = Datastore.get_default(ws)
 datastore = Datastore.get(ws, p_datastore_name)
 
-# Get the split (by whether target column) Datasets for training and testing from the datastore of the Workspace
-# (having registered them already in Notebook code)
+# Get the split Datasets for training and testing from the datastore of the Workspace (split by "whether target column") 
+# (these Datasets must must already be registered, they should have been registered in the Notebook code)
+
 # X_train = Dataset.get_by_name(ws, X_train_registered_name, version = 'latest').to_pandas_dataframe()
 X_test  = Dataset.get_by_name(ws, X_test_registered_name, version = 'latest').to_pandas_dataframe()
+# REMOVE THE weight_column
 X_test_dropped_weight_column = X_test.drop([p_weight_column_name], axis=1)
+
 # y_train = Dataset.get_by_name(ws, y_train_registered_name, version = 'latest').to_pandas_dataframe()
 y_test = Dataset.get_by_name(ws, y_test_registered_name, version = 'latest').to_pandas_dataframe()
 
@@ -224,8 +230,7 @@ autoMLConfig = AutoMLConfig(task='classification',
 
 
 # Run AutoML training from here
-experiment_name = 'Titanic_Docker_Classification_Training_AutoML'
-experiment = Experiment(workspace=ws, name=experiment_name)
+experiment = Experiment(workspace=ws, name=p_automlconfig_experiment_name)
 AutoML_run = experiment.submit(autoMLConfig, show_output = True)
 print("calling wait_for_completion on the AutoML_run")
 AutoML_run.wait_for_completion()
@@ -239,7 +244,6 @@ print("Printing bestModel:", bestModel)
 
 # Training the model is as simple as this
 # We use the predict() on the model to predict the output
-# TODO! FIX ERROR HERE, REMOVE THE weight_column
 prediction = bestModel.predict(X_test_dropped_weight_column)
 
 # Log classification metrics to evaluate the model with, using accuracy and F1 score for Classification here
