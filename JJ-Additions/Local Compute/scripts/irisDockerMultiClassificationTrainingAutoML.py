@@ -251,7 +251,7 @@ prediction = bestModel.predict(X_test_dropped_weight_column)
 
 # Log classification metrics to evaluate the model with, using accuracy and F1 score for Classification here
 accuracy = accuracy_score(y_test, prediction)
-f1 = f1_score(y_test, prediction)
+f1 = f1_score(y_test, prediction, average='macro')
 print("accuracy: ", accuracy)
 print("f1: ", f1)
 run.log('accuracy', accuracy)
