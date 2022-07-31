@@ -48,6 +48,7 @@ long_options = [
     'resource-group=',
     'datastore-name=',
     'out-model-file-name=',
+    'target-column-name=',
     'numeric-feature-names=',
     'categoric-feature-names=',
     'x-train-test-y-train-test-combined-train-test=',
@@ -74,6 +75,8 @@ for opt, arg in opts:
         p_datastore_name = arg
     elif opt == '--out-model-file-name':
         p_out_model_file_name = arg
+    elif opt == '--target-column-name':
+        p_target_column_name = arg
     elif opt == '--numeric-feature-names':
         # Take in string encoding of list of numeric feature names, turn back into a list
         p_numeric_feature_names = arg
@@ -223,7 +226,7 @@ automl_settings = {
 autoMLConfig = AutoMLConfig(task='classification',
                       compute_target=compute_target,
                       training_data=train_data,
-                      label_column_name='Survived',
+                      label_column_name=p_target_column_name,
                       num_classes=p_num_classes,
                       weight_column_name=p_weight_column_name,
                       **automl_settings)
