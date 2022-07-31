@@ -216,7 +216,7 @@ automl_settings = {
     "featurization":'auto',
     "experiment_timeout_minutes":15,
     "enable_early_stopping":True,
-    "n_cross_validations":5,
+    "n_cross_validations":10,
     "model_explainability":True,
     "max_concurrent_iterations": 8,
     "max_cores_per_iteration": -1,
