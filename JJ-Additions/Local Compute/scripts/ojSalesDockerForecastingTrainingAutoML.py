@@ -12,9 +12,9 @@ import numpy as np
 
 #Importing the Decision Tree from scikit-learn library
 # Metrics for Evaluation of model Accuracy and F1-score, for classification
-from sklearn.metrics  import f1_score,accuracy_score
+# from sklearn.metrics  import f1_score,accuracy_score
 # Metrics for Evaluation of model: RSME and R2 for regression
-# from sklearn.metrics  import mean_squared_error,r2_score
+from sklearn.metrics  import mean_squared_error,r2_score
 
 # Import the rest
 import subprocess
@@ -52,8 +52,6 @@ long_options = [
     'numeric-feature-names=',
     'categoric-feature-names=',
     'x-train-test-y-train-test-combined-train-test=',
-    'num_classes=',
-    'weight_column_name=',
     'automlconfig_experiment_name='
 ]
 opts, args = getopt.getopt(argv, None, long_options)
@@ -122,10 +120,6 @@ for opt, arg in opts:
         y_test_registered_name = xTrainTestYTrainTestCombinedTrainTest[3]
         train_data_registered_name = xTrainTestYTrainTestCombinedTrainTest[4]
         test_data_registered_name = xTrainTestYTrainTestCombinedTrainTest[5]
-    elif opt == '--num_classes':
-        p_num_classes = arg
-    elif opt == '--weight_column_name':
-        p_weight_column_name = arg
     elif opt == '--automlconfig_experiment_name':
         p_automlconfig_experiment_name = arg
     else:
@@ -184,8 +178,6 @@ datastore = Datastore.get(ws, p_datastore_name)
 
 # X_train = Dataset.get_by_name(ws, X_train_registered_name, version = 'latest').to_pandas_dataframe()
 X_test  = Dataset.get_by_name(ws, X_test_registered_name, version = 'latest').to_pandas_dataframe()
-# REMOVE THE weight_column
-X_test_dropped_weight_column = X_test.drop([p_weight_column_name], axis=1)
 
 # y_train = Dataset.get_by_name(ws, y_train_registered_name, version = 'latest').to_pandas_dataframe()
 y_test = Dataset.get_by_name(ws, y_test_registered_name, version = 'latest').to_pandas_dataframe()
@@ -212,23 +204,37 @@ print("Printing train_data: ", train_data)
 
 # AutoMLConfig for properties that may change value for optimization and configuration purposes
 automl_settings = {
-    "primary_metric":'accuracy',
+    "primary_metric":'normalized_root_mean_squared_error',
     "featurization":'auto',
     "experiment_timeout_minutes":15,
     "enable_early_stopping":True,
-    "n_cross_validations":10,
+    "n_cross_validations":3,
     "model_explainability":True,
     "max_concurrent_iterations": 8,
     "max_cores_per_iteration": -1,
     "verbosity": logging.INFO,
 }
+# TODO (first try inside the notebook to validate this works) send in params from the Notebook
+forecasting_parameters = ForecastingParameters.from_parameters_dict({
+    'country_or_region_for_holidays': 'US',
+    'drop_columns_names': 'Revenue',
+    'forecast_horizon': 6,
+    'target_rolling_window_size': 'auto',
+    'target_lags': 'auto',
+    'feature_lags': 'auto',
+    'seasonality': 'auto',
+    'short_series_handling': True,
+    'use_stl': 'season_trend',
+    'time_column_name': 'WeekStarting',
+    'time_series_id_column_names': ['Store','Brand'],
+    'short_series_handling_configuration':
+    'auto'}
+    , validate_params=True)
 # Leave the more or less unchanging properties as non kwargs
-autoMLConfig = AutoMLConfig(task='classification',
+autoMLConfig = AutoMLConfig(task='forecasting',
                       compute_target=compute_target,
                       training_data=train_data,
                       label_column_name=p_target_column_name,
-                      num_classes=p_num_classes,
-                      weight_column_name=p_weight_column_name,
                       **automl_settings)
 
 
@@ -247,15 +253,15 @@ print("Printing bestModel:", bestModel)
 
 # Training the model is as simple as this
 # We use the predict() on the model to predict the output
-prediction = bestModel.predict(X_test_dropped_weight_column)
+prediction = bestModel.predict(X_test)
 
 # Log classification metrics to evaluate the model with, using accuracy and F1 score for Classification here
-accuracy = accuracy_score(y_test, prediction)
-f1 = f1_score(y_test, prediction, average='macro')
-print("accuracy: ", accuracy)
-print("f1: ", f1)
-run.log('accuracy', accuracy)
-run.log('f1', f1)
+mse = mean_squared_error(y_test, prediction)
+r2 = r2_score (y_test, prediction)
+print("mean_squared_error: ", mse)
+run.log('mean_squared_error', mse)
+print("r2_score: ", r2)
+run.log('r2_score', r2)
 
 # for regression...
 # 
