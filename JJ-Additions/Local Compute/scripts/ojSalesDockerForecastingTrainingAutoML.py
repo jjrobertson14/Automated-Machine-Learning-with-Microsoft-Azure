@@ -1,5 +1,7 @@
 from azureml.core import Workspace, Dataset, Datastore, Experiment
 from azureml.core.run import Run
+# Forecasting Specific
+from azureml.automl.core.forecasting_parameters import ForecastingParameters
 
 import getopt
 import joblib
