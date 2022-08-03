@@ -215,6 +215,9 @@ automl_settings = {
     "max_concurrent_iterations": 8,
     "max_cores_per_iteration": -1,
     "verbosity": logging.INFO,
+    "model_explainability": True, 
+    "enable_stack_ensemble": False, # Stack ensembles can lead to overfitting when used for forecasting problems
+    "enable_voting_ensemble": True,
 }
 # TODO (first try inside the notebook to validate this works) send in params from the Notebook
 forecasting_parameters = ForecastingParameters.from_parameters_dict({
@@ -229,14 +232,15 @@ forecasting_parameters = ForecastingParameters.from_parameters_dict({
     'use_stl': 'season_trend',
     'time_column_name': 'WeekStarting',
     'time_series_id_column_names': ['Store','Brand'],
-    'short_series_handling_configuration':
-    'auto'}
+    'short_series_handling_configuration':'auto'
+    }
     , validate_params=True)
 # Leave the more or less unchanging properties as non kwargs
 autoMLConfig = AutoMLConfig(task='forecasting',
                       compute_target=compute_target,
                       training_data=train_data,
                       label_column_name=p_target_column_name,
+                      forecasting_parameters=forecasting_parameters,
                       **automl_settings)
 
 
