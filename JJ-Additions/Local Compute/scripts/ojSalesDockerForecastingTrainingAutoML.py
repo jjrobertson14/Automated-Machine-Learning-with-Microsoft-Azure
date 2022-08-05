@@ -220,6 +220,7 @@ automl_settings = {
     "enable_voting_ensemble": True,
 }
 # TODO (first try inside the notebook to validate this works) send in params from the Notebook
+# TODO (Then pass in automl_settings and forecasting_parameters in from the Notebook, encoded in script args of the ScriptRunConfig in the Notebook)
 forecasting_parameters = ForecastingParameters.from_parameters_dict({
     'country_or_region_for_holidays': 'US',
     'drop_columns_names': 'Revenue',
